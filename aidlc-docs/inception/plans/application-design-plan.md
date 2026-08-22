@@ -160,6 +160,88 @@ X) Other (please describe after [Answer]: tag below)
 
 ---
 
+## Part 1.5: 追加質問（回答の分析で検出した曖昧さ）
+
+回答は概ね明確でしたが、2 点だけ設計が大きく分岐するため確認します。
+
+---
+
+## Question 5-a（Q5 のフォローアップ）
+
+Q5 で「クリーンアーキテクチャっぽくなるように、良い感じに」とのことでした。
+ここで層をどこまで作るかを決めないと、コンポーネント設計全体が変わります。
+
+**論点**: ADR-004 は「要件が無い層は作らない」と定めています。一方でクリーンアーキテクチャは
+層とインターフェースを増やす方向に働きます。このサイトのドメインは
+「Markdown を読んで HTML に変換する」だけで、業務ルールも永続化も外部連携もありません。
+層を厚くするほど、ADR-004 の主張と実装が食い違います。
+
+以下のどの深さにしますか。
+
+A) **Laravel 標準に寄せた薄い構成**（層は増やさない）
+
+```
+app/
+  Http/Controllers/PortfolioController.php
+  Services/MarkdownParser.php          # CommonMark のラッパ
+  Services/ContentRepository.php       # ファイル読み込み + パース + キャッシュ
+  Data/SectionContent.php              # DTO（readonly class）
+```
+
+B) **軽量な 3 層 + インターフェース**（依存の向きだけ制御する。推奨）
+
+```
+app/
+  Domain/Content/
+    Section.php                        # エンティティ相当（readonly）
+    SectionId.php                      # 値オブジェクト（enum）
+    ContentRepositoryInterface.php     # ポート（Domain 側が所有）
+  Application/Content/
+    GetPortfolioContent.php            # ユースケース。全セクションを組み立てる
+  Infrastructure/Content/
+    MarkdownContentRepository.php      # アダプタ。ファイル読み込み + パース + キャッシュ
+    CommonMarkParser.php               # MarkdownParser の実装
+  Http/Controllers/PortfolioController.php
+```
+
+C) **フルなクリーンアーキテクチャ**（Entity / UseCase / Port / Adapter / Presenter を全て分ける）
+
+```
+app/
+  Domain/           # Entity, ValueObject, RepositoryInterface, DomainService
+  Application/      # UseCase, InputPort, OutputPort, InputData, OutputData
+  Infrastructure/   # Repository実装, Parser実装, Cache実装
+  Presentation/     # Controller, Presenter, ViewModel
+```
+
+X) Other (please describe after [Answer]: tag below)
+
+[Answer]:B
+
+---
+
+## Question 6-a（Q6 のフォローアップ）
+
+Q6 の回答は「B) そのセクションを非表示にする」と「パースに失敗しましたのメッセージを表示する」の
+両方でした。この 2 つは動作が異なるため、どちらかに寄せる必要があります。
+
+なお、どの案でも詳細なエラー内容（ファイルパス・スタックトレース）は画面に出さず、
+CloudWatch Logs にのみ記録します（NFR-S6 / SECURITY-09, 15）。
+
+A) セクションの枠は残し、本文の位置に「コンテンツを読み込めませんでした」と表示する
+   （欠落が利用者からも自分からも見える）
+
+B) 本番では該当セクションを完全に非表示にし、ローカル開発時のみエラーメッセージを表示する
+   （公開サイトに不備を見せない）
+
+C) セクションは非表示にし、画面のどこにもメッセージを出さない（ログのみ）
+
+X) Other (please describe after [Answer]: tag below)
+
+[Answer]:A
+
+---
+
 ## Part 2: 実行ステップ（回答後に実施）
 
 回答を受け取り、曖昧さがないか検証したうえで以下を生成します。

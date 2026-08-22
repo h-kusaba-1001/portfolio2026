@@ -39,7 +39,7 @@ Inception → Construction → Operations の 3 フェーズのうち、Inceptio
 |---|---|---|---|
 | UoW-1 | 基盤構築（Sail + Laravel + Inertia + Tailwind + Bref + osls、デプロイ疎通まで） | なし | — |
 | UoW-2 | コンテンツ基盤（Markdown → CommonMark → Inertia props） | UoW-1 | US-7 |
-| UoW-3 | 静的セクション（Hero / やってきたこと / キャリア / これから / Contact） | UoW-2 | US-1, US-4, US-5, US-6 |
+| UoW-3 | 静的セクション（Hero / やってきたこと / キャリア / これから） | UoW-2 | US-1, US-4, US-5, US-6 |
 | UoW-4 | **構成図アニメーション**（リクエストの流れ + ノード別選定理由 + 拡張ポイント） | UoW-2 | US-2, US-3 |
 
 UoW-3 と UoW-4 は UoW-2 完了後に並行可能。
