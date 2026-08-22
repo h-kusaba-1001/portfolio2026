@@ -505,3 +505,56 @@ Q1: "A
 **Context**: CONSTRUCTION フェーズ / UoW-1 / デプロイ後の追加作業
 
 ---
+
+## CONSTRUCTION / UoW-1: Code Generation - Approval
+**Timestamp**: 2026-08-22T14:40:00Z
+**AI Prompt**: "Continue to Next Stage - 承認し、UoW-2（コンテンツ基盤）の Functional Design へ進む"
+**User Response**: "✅ Continue to Next Stage -"
+**Status**: Approved
+**Context**: CONSTRUCTION フェーズ / UoW-1 完了（B-1・B-2 とも）。**P-2（HTML がキャッシュされない）は未解決のまま次ステージへ持ち越し**
+
+---
+
+## CONSTRUCTION / UoW-2: Functional Design 計画と質問の提示
+**Timestamp**: 2026-08-22T14:40:00Z
+**User Input**: N/A（承認済みにより自動進行）
+**AI Response**: `construction/functional-design.md` をロードして実行。**`content/*.md` の実データを確認し、Application Design と実データの食い違いを 3 件検出**: (1) `experience.md` と `next.md` には H2 が 1 つも無く、「ContentBlock（H2 見出し + HTML）の集まり」というモデルでは中身が空になる (2) `MarkdownContentRepository.find()` の「パース結果が空配列なら ContentUnavailable」という判定により、**正常な 2 ファイルが誤って失敗扱いになる** (3) 全ファイルに H1 直後のリード文があるが、現行モデルに置き場所がない（特に `stack.md` のリード文は構成図の導入文にあたる）。この 3 点を解消する質問を含め、7 問を `aidlc-docs/construction/plans/uow-2-content-functional-design-plan.md` に作成。UoW-2 は UI コンポーネントを持たないため `frontend-components.md` は作成せず、props の契約は `business-logic-model.md` に記載する方針を明記。
+**Context**: CONSTRUCTION フェーズ / UoW-2 / Functional Design Step 1〜4
+
+---
+
+## CONSTRUCTION / UoW-2: Functional Design 回答受領と成果物生成
+**Timestamp**: 2026-08-22T15:00:00Z
+**User Input**: "記入した"
+（uow-2-content-functional-design-plan.md への記入内容 — 完全な生の回答）
+Q1: "A
+
+とりあえずAで動作を見たい"
+Q2: "C"
+Q3: "A"
+Q4: "C"
+Q5: "B"
+Q6: "A"
+Q7: "A
+
+ただし、APIで一括でページ全体を取っているのであればCでOKです"
+**AI Response**: Step 5 の必須分析を実施。**Q7 が条件付き回答**（「API で一括してページ全体を取っているなら C でよい」）だったため条件を評価: 単一ページ構成のため `GetPortfolioContent` が 1 リクエストで 4 セクションをまとめて組み立てており、**条件は満たされる**。そのうえで A（セクション単位）を採用し、理由を business-logic-model.md §5 に明記（① 失敗をキャッシュしない規則 R-6-3 と噛み合う ② ページ全体のキーは 4 ファイル分の更新時刻が必要で複雑 ③ 承認済みの層設計（ポートのデコレータ）を保てる ④ 得られるのはキャッシュ読み取り 4 回→1 回の削減のみで `/tmp` のファイルキャッシュでは体感差が出ない）。C に切り替えるべき状況も併記。他の回答に曖昧さなし。
+
+成果物 3 点を生成: domain-entities.md（`Section` に `lead`、`ContentBlock` に `key` を追加した確定モデル、実データでの正規化例、クラス図 + テキスト代替）、business-rules.md（R-1 分割規則 / R-2 正規化規則 / R-3 失敗判定 / R-4 HTML 変換のセキュリティ / R-5 順序 / R-6 キャッシュ / R-7 未知ファイル）、business-logic-model.md（分割アルゴリズムの擬似コード、キャッシュのシーケンス、props への写像の具体例、テストで固定すべき 10 項目 T-1〜T-10）。
+
+**設計との差異を反映**: Application Design の `component-methods.md` から「パース結果が空配列なら `ContentUnavailable`」の記述を撤回し、確定内容の表に差し替え。`resources/js/types/index.ts` に `lead` と `key` を追加（型チェック通過）。
+
+**UoW-4 への申し送りを明記**: 正規化規則がサーバ（PHP）とフロント（TypeScript）の 2 箇所に必要になる構造的な弱点があり、ずれると実行時まで気付けない。緩和策 3 点（全ノードの key の実在検証テスト / 不一致時のフォールバック表示 / ノード定義を PHP からも読める形に置く検討）を business-rules.md R-2 と aidlc-state.md に記録。
+
+Security Compliance: 準拠 5（SECURITY-05, 09, 11, 13, 15）/ N/A 10 / ブロッキング所見なし。
+**Context**: CONSTRUCTION フェーズ / UoW-2 / Functional Design Step 5〜6
+
+---
+
+## CONSTRUCTION / UoW-2: Functional Design 承認プロンプト提示
+**Timestamp**: 2026-08-22T15:00:00Z
+**User Input**: N/A（承認待ち）
+**AI Response**: 標準の 2 択完了メッセージを提示。次ステージは UoW-2 の Code Generation。
+**Context**: CONSTRUCTION フェーズ / UoW-2 / Functional Design Step 7〜8
+
+---

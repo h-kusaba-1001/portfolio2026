@@ -126,11 +126,18 @@ interface MarkdownParserInterface
 |---|---|---|---|
 | `toBlocks()` | Markdown を H2 見出し単位のブロック列に変換する | `string $markdown` | `list<ContentBlock>` |
 
-**Functional Design で確定する事項**
-- H1 見出しの扱い（セクションタイトルとして使うか捨てるか）
-- H2 より前にある本文（リード文）の扱い
-- H2 が 1 つも無いファイル（`career.md` など）の扱い
-- 空ファイル・見出しのみのファイルの扱い
+**Functional Design で確定済み**（`aidlc-docs/construction/uow-2-content/functional-design/`）
+
+| 論点 | 確定内容 |
+|---|---|
+| H1 の扱い | `title` として取り出し、**HTML からは除去する**（Q3 = A） |
+| リード文（H2 より前の本文） | `Section.lead` として保持する（Q1 = A。**モデルに追加**） |
+| H2 が 1 つも無いファイル | `blocks` は空配列。**失敗ではない**（`experience.md` / `next.md` が該当） |
+| 空ファイル | 本文が空なら失敗（`BODY_EMPTY`） |
+| 見出しの照合 | 正規化キー `ContentBlock.key` を用いる（前後空白除去 → 連続空白の畳み込み → ASCII 小文字化） |
+
+**注意**: 当初の「パース結果が空配列なら `ContentUnavailable`」という判定は
+**撤回した**。H2 を持たない正常なファイルが誤って失敗扱いになるため（R-3）。
 
 ### `App\Domain\Content\ContentUnavailable`（例外）
 

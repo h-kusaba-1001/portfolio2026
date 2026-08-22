@@ -87,7 +87,7 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [ ] Units Generation — SKIP（UoW-1〜4 が既存）
 
 ### 🟢 CONSTRUCTION PHASE
-- [ ] Functional Design — EXECUTE（UoW-2 のみ）
+- [x] Functional Design — EXECUTE（UoW-2 のみ）※承認待ち
 - [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] NFR Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
@@ -99,8 +99,8 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: UoW-1 / Code Generation 完了（B-1・B-2 とも完了）
-- **Next Stage**: UoW-2 の Functional Design
+- **Current Stage**: UoW-2 / Functional Design 完了
+- **Next Stage**: UoW-2 の Code Generation
 - **Status**: 承認待ち
 
 ## 🌐 公開 URL
@@ -157,8 +157,8 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 ## Unit Progress
 | Unit | ディレクトリ | 状態 |
 |---|---|---|
-| UoW-1 基盤構築 | `aidlc-docs/construction/uow-1-foundation/` | **完了（デプロイ済み）**。承認待ち |
-| UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | 未着手 |
+| UoW-1 基盤構築 | `aidlc-docs/construction/uow-1-foundation/` | **完了・承認済み（2026-08-22 デプロイ済み）** |
+| UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | Functional Design 完了（承認待ち） |
 | UoW-3 静的セクション | `aidlc-docs/construction/uow-3-sections/` | 未着手 |
 | UoW-4 構成図 | `aidlc-docs/construction/uow-4-diagram/` | 未着手 |
 
@@ -173,3 +173,18 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 
 ## Open Items
 - なし（フロントエンドの言語は TypeScript で確定。ADR-006 に追記済み）
+
+## UoW-2 Functional Design で確定した内容
+- `Section` に **`lead`**（最初の H2 より前の HTML）を追加。H2 を持たない `experience.md` / `next.md` に対応
+- `ContentBlock` に **`key`**（正規化済み見出し）を追加。表示は `heading`、照合は `key`
+- **「パース結果が空 = 失敗」を撤回。** 失敗はファイル不在 / 読み取り不能 / 本文が空 / 変換例外の 4 条件のみ
+- セクションタイトルは H1 由来、無ければ `SectionId` の既定値
+- 正規化規則: 前後空白の除去 → 連続空白の畳み込み → ASCII 小文字化
+- キャッシュはセクション単位（Q7 の条件付き回答を評価したうえで A を採用）
+
+## UoW-4 への申し送り（重要）
+正規化規則が **サーバ（PHP）とフロント（TypeScript）の 2 箇所**に必要になる。
+ずれると実行時まで気付けないため、UoW-4 で必ず次を行う:
+1. 全ノードの `key` が `stack.md` の `blocks` に実在することを検証するテスト
+2. 不一致時は「この要素の説明はまだありません」を表示して画面を壊さない
+3. ノード定義を PHP からも読める形（JSON 等）に置くことの検討
