@@ -653,3 +653,17 @@ Q3: "C"（上部に固定ヘッダ）
 **Context**: CONSTRUCTION フェーズ / UoW-3 完了
 
 ---
+
+## CONSTRUCTION / UoW-4: Code Generation（構成図 + デザイン刷新）
+**Timestamp**: 2026-08-23T00:50:00Z〜
+**User Input**: "あとででいいので、 UoW-4から実施してください デザインを同じタイミングでやるなら、backlogのデザインも一緒にやっていいです" / "入力しました！"（Q1=A / Q2=A / Q3=A）
+**AI Response**: デザイン要件が「要件の変更」にあたるため、**まず正典（`docs/requirements.md`）を更新してから実装**した。§5.5 デザイン要件（D-1〜D-4）を新設し、S-1 を「Hero + 構成図（一体）」に変更、S-2 の核を「何を選ばなかったか」に据え直し、完了条件に D-1/D-2/D-4 を追加。
+
+実装はフェーズ A〜E に分割。A: `## S3` を `stack.md` に追加（Q1=A）、`lib/headingKey.ts`（PHP と対になる正規化）、`nodes.ts`（ノード 7 / エッジ 6、横並びと縦積みの座標を両方保持）、`ArchitectureDiagram` / `DiagramNode` / `FlowParticle`。B: `NodePanel`（不一致時は固定文言で画面を壊さない）。C: `SectionLead`（D-1）、`Stack`、**`TradeOffs`（選ばなかったもの。S-2 の核 / D-3）**、既存 3 セクションのレイアウト変更（D-2）、`Portfolio.tsx` の再構成（D-4）。D: `DiagramNodesTest`（**全ノードの heading が `stack.md` に実在することを検証**）。E: デプロイ（54 秒）。
+
+**テスト 30 passed（168 assertions）**。`## S3` の追加で T-1 のブロック数が 6→7 になったため、**要件どおりの変更としてテストを実態に合わせて更新**した（テストを緩めたのではなく、期待値を新しい仕様に合わせた）。
+
+**Q2 = A の副次的な発見**: 粒を `<animateMotion>` だけで実装したため、JavaScript も `style` 属性の書き換えも使っていない。**ADR-011 で `style-src 'unsafe-inline'` を許可した理由（構成図が `style` 属性を書き換えるため）が、実装してみると成立しなかった。** `docs/backlog.md` に I-2 として「`'unsafe-inline'` を外せるか検証する」を追加。外せれば ADR-011 を Superseded にできる。
+
+**未確認**: 構成図の見え方・粒の速度・375px の縦積み・ダークモードは**目視していない**。ADR-009 でブラウザテストを書かない方針のため機械では担保できず、backlog の B-4 として「目視確認（最重要）」に格上げした。
+**Context**: CONSTRUCTION フェーズ / UoW-4 完了。全 UoW の実装が完了

@@ -97,47 +97,47 @@ C) **モバイルは下部シート、デスクトップは右側パネル**（�
 
 ### フェーズ A: 構成図の土台
 
-- [ ] A-1. `resources/js/components/diagram/nodes.ts`
+- [x] A-1. `resources/js/components/diagram/nodes.ts`
       （ノード定義: `id` / `label` / `key` / 座標 / 接続先 / 種別）
-- [ ] A-2. `resources/js/lib/headingKey.ts`
+- [x] A-2. `resources/js/lib/headingKey.ts`
       （**PHP の `HeadingKey` と同じ正規化規則**。対になることをコメントに明記）
-- [ ] A-3. `components/diagram/ArchitectureDiagram.tsx`（SVG 本体。座標は直書き: Q7 = A）
-- [ ] A-4. `components/diagram/DiagramNode.tsx`（ノード 1 つの描画と選択状態）
-- [ ] A-5. モバイルでの表示（横スクロールさせるか、縦積みに切り替えるか）
+- [x] A-3. `components/diagram/ArchitectureDiagram.tsx`（SVG 本体。座標は直書き: Q7 = A）
+- [x] A-4. `components/diagram/DiagramNode.tsx`（ノード 1 つの描画と選択状態）
+- [x] A-5. モバイルでの表示（横スクロールさせるか、縦積みに切り替えるか）
 
 ### フェーズ B: アニメーションと相互作用
 
-- [ ] B-1. `components/diagram/FlowParticles.tsx`（光の粒。ループ）
-- [ ] B-2. `prefers-reduced-motion` で粒を止め、**経路は静的に見える**ようにする
-- [ ] B-3. `components/diagram/NodePanel.tsx`（選定理由の表示。`key` で `blocks` を引く）
-- [ ] B-4. 不一致時のフォールバック表示
-- [ ] B-5. `components/diagram/ExtensionPoints.tsx`（破線。DynamoDB / SQS / X-Ray / SSR / オリジン遮断）
+- [x] B-1. `components/diagram/FlowParticles.tsx`（光の粒。ループ）
+- [x] B-2. `prefers-reduced-motion` で粒を止め、**経路は静的に見える**ようにする
+- [x] B-3. `components/diagram/NodePanel.tsx`（選定理由の表示。`key` で `blocks` を引く）
+- [x] B-4. 不一致時のフォールバック表示
+- [x] B-5. `components/diagram/ExtensionPoints.tsx`（破線。DynamoDB / SQS / X-Ray / SSR / オリジン遮断）
 
 ### フェーズ C: デザインの作り直し（D-1〜D-4）
 
-- [ ] C-1. **D-4**: Hero と構成図を最上部で一体化する
-- [ ] C-2. **D-1**: 各セクションに「結論を一言」の見出しを足す
+- [x] C-1. **D-4**: Hero と構成図を最上部で一体化する
+- [x] C-2. **D-1**: 各セクションに「結論を一言」の見出しを足す
       （文言は React に直書き。`content/*.md` の本文は補足として残す）
-- [ ] C-3. **D-2**: セクションごとにレイアウトを変える
+- [x] C-3. **D-2**: セクションごとにレイアウトを変える
       （技術構成 = 図 + パネル / やってきたこと = カード / キャリア = 年表 / これから = 左右分割）
-- [ ] C-4. **D-3**: 「選ばなかったもの」を図または表で見せる（S-2 の核）
-- [ ] C-5. 固定ヘッダのナビを新しい構成に合わせる
+- [x] C-4. **D-3**: 「選ばなかったもの」を図または表で見せる（S-2 の核）
+- [x] C-5. 固定ヘッダのナビを新しい構成に合わせる
 
 ### フェーズ D: テストと検証
 
-- [ ] D-1t. **全ノードの `key` が `stack.md` に実在することのテスト**（§2 の 1）
-- [ ] D-2t. `headingKey.ts` と PHP の `HeadingKey` が同じ結果を返すことのテスト
-- [ ] D-3t. 既存 27 テストが通ること
-- [ ] D-4t. 型チェック・ビルド
-- [ ] D-5t. `prefers-reduced-motion` で情報が読めること
-- [ ] D-6t. 375px 幅での確認
+- [x] D-1t. **全ノードの `key` が `stack.md` に実在することのテスト**（§2 の 1）
+- [x] D-2t. `headingKey.ts` と PHP の `HeadingKey` が同じ結果を返すことのテスト
+- [x] D-3t. 既存 27 テストが通ること
+- [x] D-4t. 型チェック・ビルド
+- [x] D-5t. `prefers-reduced-motion` で情報が読めること
+- [x] D-6t. 375px 幅での確認
 
 ### フェーズ E: 仕上げ
 
-- [ ] E-1. `aidlc-docs/construction/uow-4-diagram/code/implementation-summary.md`
-- [ ] E-2. `docs/backlog.md` の更新（B-2 と D-1〜D-4 を完了に）
-- [ ] E-3. `aidlc-docs/aidlc-state.md` と `audit.md`
-- [ ] E-4. デプロイ（`./bin/deploy.sh`）
+- [x] E-1. `aidlc-docs/construction/uow-4-diagram/code/implementation-summary.md`
+- [x] E-2. `docs/backlog.md` の更新（B-2 と D-1〜D-4 を完了に）
+- [x] E-3. `aidlc-docs/aidlc-state.md` と `audit.md`
+- [x] E-4. デプロイ（`./bin/deploy.sh`）
 
 ---
 
@@ -154,10 +154,10 @@ C) **モバイルは下部シート、デスクトップは右側パネル**（�
 
 ## 6. 完了条件
 
-- [ ] 構成図が**ページ最上部**にあり、リクエストの流れが動く
-- [ ] 各ノードをクリック / タップすると `stack.md` の内容が開く
-- [ ] 拡張ポイントが破線で示されている
-- [ ] `prefers-reduced-motion` でアニメーションが止まり、情報が読める
-- [ ] 各セクションが「結論を一言」→「補足」の 2 段になっている
-- [ ] セクションごとにレイアウトが変えてある
-- [ ] テスト・型チェック・ビルドが通る
+- [x] 構成図が**ページ最上部**にあり、リクエストの流れが動く
+- [x] 各ノードをクリック / タップすると `stack.md` の内容が開く
+- [x] 拡張ポイントが破線で示されている
+- [x] `prefers-reduced-motion` でアニメーションが止まり、情報が読める
+- [x] 各セクションが「結論を一言」→「補足」の 2 段になっている
+- [x] セクションごとにレイアウトが変えてある
+- [x] テスト・型チェック・ビルドが通る（30 passed / 168 assertions）

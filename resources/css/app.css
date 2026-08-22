@@ -35,6 +35,9 @@
     --border: #e2e8f0;
     --accent: #047857;
     --accent-hover: #065f46;
+    --diagram-node: #f0fdf4;
+    --diagram-node-quiet: #f8fafc;
+    --diagram-border: #cbd5e1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -61,6 +64,9 @@
     --border: #1e293b;
     --accent: #34d399;
     --accent-hover: #6ee7b7;
+    --diagram-node: #132a24;
+    --diagram-node-quiet: #111a2e;
+    --diagram-border: #334155;
 }
 
 body {

@@ -4,7 +4,7 @@
 - **Project Name**: portfolio2026（HK Portfolio）
 - **Project Type**: Greenfield
 - **Start Date**: 2026-08-22T08:51:01Z
-- **Current Stage**: CONSTRUCTION - UoW-1 完了 / UoW-2 未着手
+- **Current Stage**: CONSTRUCTION - **UoW-1〜4 すべて完了・デプロイ済み**
 
 ## Workspace State
 - **Existing Code**: No（Markdown ドキュメントのみ。ソースコード・ビルドファイルなし）
@@ -91,7 +91,7 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] NFR Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
-- [ ] Code Generation — EXECUTE（UoW-1〜4）※**UoW-1・UoW-2 完了**、UoW-3・UoW-4 未着手
+- [x] Code Generation — EXECUTE（UoW-1〜4）※**全ユニット完了・デプロイ済み**（UoW-3・UoW-4 は承認待ち）
 - [ ] Build and Test — EXECUTE
 
 ### 🟡 OPERATIONS PHASE
@@ -99,9 +99,9 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: UoW-3 / Code Generation 完了（本番反映済み）
-- **Next Stage**: **UoW-4（構成図アニメーション）** — 最後のユニット
-- **Status**: 承認待ち
+- **Current Stage**: **UoW-1〜4 すべて完了・デプロイ済み**
+- **Next Stage**: Build and Test（最終確認）
+- **Status**: UoW-3・UoW-4 の承認待ち
 
 ## 📋 残課題は `docs/backlog.md` に集約
 P-2（キャッシュ）/ S-1（SBOM 未実施）/ V-7（ログ形式）/ I-1（ビルド・デプロイ時間）/ C-1（AI-DLC をサイトに書く）ほか。**未解決事項はこのファイルを見れば分かる。**
@@ -155,7 +155,7 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 - AWS WAF を使わず、キャッシュ + 同時実行上限 + 予算アラートで濫用対策（ADR-013）
 - JSON 構造化ログ、ログ保持は一律 14 日（ADR-014。SECURITY-14 のログ保持要件は適用外）
 - デプロイ IAM は専用ポリシー（リソースはワイルドカード。SECURITY-06 の例外として記録）
-- 依存スキャンは `composer audit` / `npm audit`、SBOM は CycloneDX
+- 依存スキャンは `composer audit` / `npm audit`。**SBOM は未実施**（backlog S-1）
 
 ## Unit Progress
 | Unit | ディレクトリ | 状態 |
@@ -163,7 +163,7 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 | UoW-1 基盤構築 | `aidlc-docs/construction/uow-1-foundation/` | **完了・承認済み（2026-08-22 デプロイ済み）** |
 | UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | **完了・承認済み（B-3 合格・デプロイ済み）** |
 | UoW-3 静的セクション | `aidlc-docs/construction/uow-3-sections/` | **完了（デプロイ済み）**。承認待ち |
-| UoW-4 構成図 | `aidlc-docs/construction/uow-4-diagram/` | 未着手 |
+| UoW-4 構成図 | `aidlc-docs/construction/uow-4-diagram/` | **完了（デプロイ済み）**。承認待ち |
 
 ## Application Design で確定した設計判断
 - レイヤ: Domain / Application / Infrastructure / Http（軽量 3 層 + ポート）

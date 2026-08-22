@@ -11,7 +11,7 @@ import GitHubLink from '@/components/ui/GitHubLink';
  */
 export default function Hero() {
     return (
-        <header className="pt-20 pb-16 sm:pt-28" data-testid="section-hero">
+        <header className="pt-16 pb-12 sm:pt-24" data-testid="section-hero">
             <p className="text-sm tracking-widest text-[color:var(--fg-faint)] uppercase">
                 HK Portfolio
             </p>
@@ -24,19 +24,13 @@ export default function Hero() {
 
             <p className="mt-6 max-w-xl leading-relaxed text-[color:var(--fg-muted)]">
                 データベースを持たず、固定費を限りなくゼロに近づけた構成で動いています。
-                何を選び、何を選ばなかったのかを公開しています。
+                <strong className="font-medium text-[color:var(--fg)]">
+                    何を選び、何を選ばなかったのか
+                </strong>
+                を、判断の経緯ごと公開しています。
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-                <a
-                    href="#stack"
-                    className="inline-flex items-center gap-2 rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-medium text-[color:var(--bg)] transition-opacity hover:opacity-90"
-                    data-testid="hero-stack-link"
-                >
-                    技術構成を見る
-                    <span aria-hidden="true">↓</span>
-                </a>
-
+            <div className="mt-8">
                 <GitHubLink />
             </div>
         </header>

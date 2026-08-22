@@ -1,6 +1,6 @@
 import ContentUnavailable from '@/components/content/ContentUnavailable';
 import MarkdownBlock from '@/components/content/MarkdownBlock';
-import Section from '@/components/layout/Section';
+import SectionLead from '@/components/layout/SectionLead';
 import type { SectionProps } from '@/types';
 
 /**
@@ -10,20 +10,24 @@ import type { SectionProps } from '@/types';
  * 「何を得たか」で語る構成のため、見出しと本文を対にして縦に並べる。
  */
 export default function Career({ section }: { section: SectionProps }) {
-    if (!section.available) {
-        return (
-            <Section id={section.id} title={section.title}>
-                <ContentUnavailable sectionId={section.id} />
-            </Section>
-        );
-    }
-
     return (
-        <Section id={section.id} title={section.title}>
-            {section.lead !== '' && <MarkdownBlock html={section.lead} />}
+        <section id="career" className="scroll-mt-20" data-testid="section-career">
+            <SectionLead eyebrow="キャリアの変遷">
+                銀行の営業から、
+                <br />
+                サーバレスを設計する側へ。
+            </SectionLead>
+
+            {!section.available && <div className="mt-8"><ContentUnavailable sectionId={section.id} /></div>}
+
+            {section.available && section.lead !== '' && (
+                <div className="mt-8">
+                    <MarkdownBlock html={section.lead} />
+                </div>
+            )}
 
             <ol className="mt-10 space-y-8 border-l border-[color:var(--border)] pl-6">
-                {section.blocks.map((block) => (
+                {section.available && section.blocks.map((block) => (
                     <li key={block.key} className="relative" data-testid={`career-${block.key}`}>
                         <span
                             aria-hidden="true"
@@ -36,6 +40,6 @@ export default function Career({ section }: { section: SectionProps }) {
                     </li>
                 ))}
             </ol>
-        </Section>
+        </section>
     );
 }

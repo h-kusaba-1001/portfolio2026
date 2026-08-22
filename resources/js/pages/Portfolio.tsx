@@ -1,18 +1,25 @@
-import ContentUnavailable from '@/components/content/ContentUnavailable';
-import MarkdownBlock from '@/components/content/MarkdownBlock';
 import ThemeToggle from '@/components/layout/ThemeToggle';
-import Section from '@/components/layout/Section';
 import Career from '@/components/sections/Career';
 import Experience from '@/components/sections/Experience';
 import Hero from '@/components/sections/Hero';
 import Next from '@/components/sections/Next';
+import Stack from '@/components/sections/Stack';
+import TradeOffs from '@/components/sections/TradeOffs';
 import type { PortfolioPageProps, SectionId, SectionProps } from '@/types';
+
+const NAV = [
+    { href: '#stack', label: '技術構成' },
+    { href: '#tradeoffs', label: '選ばなかったもの' },
+    { href: '#experience', label: 'やってきたこと' },
+    { href: '#career', label: 'キャリア' },
+    { href: '#next', label: 'これから' },
+];
 
 /**
  * トップページ。単一ページ構成（Q4 = A）。
  *
- * S-2（技術構成）は UoW-4 で構成図に差し替えるため、
- * ここでは暫定表示のまま残している。
+ * 並びは docs/requirements.md §5 のとおり。
+ * 構成図は Hero と一体で最上部に置く（D-4）。
  */
 export default function Portfolio({ sections }: PortfolioPageProps) {
     const find = (id: SectionId): SectionProps | undefined =>
@@ -30,8 +37,9 @@ export default function Portfolio({ sections }: PortfolioPageProps) {
             <main className="mx-auto max-w-3xl px-6 pb-28">
                 <Hero />
 
-                <div className="space-y-24">
-                    {stack !== undefined && <StackPlaceholder section={stack} />}
+                <div className="space-y-24 sm:space-y-32">
+                    {stack !== undefined && <Stack section={stack} />}
+                    <TradeOffs />
                     {experience !== undefined && <Experience section={experience} />}
                     {career !== undefined && <Career section={career} />}
                     {next !== undefined && <Next section={next} />}
@@ -43,33 +51,21 @@ export default function Portfolio({ sections }: PortfolioPageProps) {
     );
 }
 
-/** 上部の固定ヘッダ（Q3 = C） */
 function SiteHeader() {
     return (
         <div className="sticky top-0 z-10 border-b border-[color:var(--border)] bg-[color:var(--bg)]/85 backdrop-blur">
-            <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
-                <a
-                    href="#top"
-                    className="text-sm font-semibold tracking-tight"
-                    data-testid="site-header-home"
-                >
+            <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-3">
+                <a href="#top" className="text-sm font-semibold tracking-tight" data-testid="site-header-home">
                     HK Portfolio
                 </a>
 
                 <div className="flex items-center gap-4">
-                    <nav className="hidden gap-4 text-sm text-[color:var(--fg-muted)] sm:flex">
-                        <a href="#stack" className="hover:text-[color:var(--fg)]">
-                            技術構成
-                        </a>
-                        <a href="#experience" className="hover:text-[color:var(--fg)]">
-                            やってきたこと
-                        </a>
-                        <a href="#career" className="hover:text-[color:var(--fg)]">
-                            キャリア
-                        </a>
-                        <a href="#next" className="hover:text-[color:var(--fg)]">
-                            これから
-                        </a>
+                    <nav className="hidden gap-4 text-sm text-[color:var(--fg-muted)] lg:flex">
+                        {NAV.map((item) => (
+                            <a key={item.href} href={item.href} className="hover:text-[color:var(--fg)]">
+                                {item.label}
+                            </a>
+                        ))}
                     </nav>
 
                     <ThemeToggle />
@@ -83,37 +79,8 @@ function SiteFooter() {
     return (
         <footer className="border-t border-[color:var(--border)]">
             <div className="mx-auto max-w-3xl px-6 py-8 text-sm text-[color:var(--fg-faint)]">
-                このサイトは AWS Lambda 上で動いています。ソースは GitHub に公開しています。
+                このサイト自体が、上の構成図のとおりに動いています。
             </div>
         </footer>
-    );
-}
-
-/**
- * S-2 の暫定表示。UoW-4 で ArchitectureDiagram に差し替える。
- * ここでは lead とブロックを素朴に並べるだけ。
- */
-function StackPlaceholder({ section }: { section: SectionProps }) {
-    return (
-        <Section id={section.id} title={section.title}>
-            {section.available ? (
-                <>
-                    {section.lead !== '' && <MarkdownBlock html={section.lead} />}
-
-                    <div className="mt-8 space-y-8">
-                        {section.blocks.map((block) => (
-                            <div key={block.key} data-testid={`block-${block.key}`}>
-                                <h3 className="font-medium">{block.heading}</h3>
-                                <div className="mt-2">
-                                    <MarkdownBlock html={block.html} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </>
-            ) : (
-                <ContentUnavailable sectionId={section.id} />
-            )}
-        </Section>
     );
 }

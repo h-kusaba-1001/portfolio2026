@@ -37,19 +37,21 @@ function useTempContent(array $files): void
 
 // --- T-1: stack.md の分割 -----------------------------------------------
 
-it('T-1: stack.md から 6 ブロックが取れ、lead が空でない', function () {
+it('T-1: stack.md から 7 ブロックが取れ、lead が空でない', function () {
     $content = app(GetPortfolioContent::class)();
     $stack = $content->section(SectionId::STACK);
 
     expect($stack->isAvailable)->toBeTrue()
-        ->and($stack->blocks)->toHaveCount(6)
+        ->and($stack->blocks)->toHaveCount(7)
         ->and($stack->lead)->not->toBe('')
         ->and($stack->lead)->toContain('AWS Lambda');
 
     $keys = array_map(fn ($b) => $b->key, $stack->blocks);
 
+    // S3 は UoW-4 で追加した（構成図のノードに対応させるため）
     expect($keys)->toBe([
         'cloudfront',
+        's3',
         'api gateway',
         'lambda (bref)',
         'laravel + inertia.js',
