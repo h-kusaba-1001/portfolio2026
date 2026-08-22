@@ -223,3 +223,63 @@ Q8: "AとC"
 **Context**: Blocking security finding
 
 ---
+
+## SECURITY FINDING（解決済み）
+**Timestamp**: 2026-08-22T10:50:00Z
+**Rule**: SECURITY-04（HTTP Security Headers for Web Applications）
+**User Input**: "回答した"
+（Question 3-a への回答）
+Q3-a: "B"
+**Resolution**: CloudFront の Response Headers Policy を維持したうえで、CloudFront が付与する共有シークレットヘッダを Lambda 側のミドルウェア（`VerifyCloudFrontOrigin`）で検証し、一致しないリクエストを 403 で拒否する。これにより HTML を返す経路が CloudFront のみとなり、SECURITY-04 に準拠する。副次的にオリジン迂回による直接負荷も防げる。
+**Status**: **解決済み**。ブロッキング解除
+**Context**: CONSTRUCTION / UoW-1 / NFR Requirements
+
+---
+
+## CONSTRUCTION / UoW-1: NFR Requirements 成果物生成
+**Timestamp**: 2026-08-22T10:50:00Z
+**User Input**: N/A
+**AI Response**: 成果物 2 点を生成。nfr-requirements.md（スケーラビリティ 3 / 性能 5 / 可用性 4 / セキュリティ 13 / 信頼性 4 / 可観測性 7 / 保守性 5 / ユーザビリティ 3 の計 44 要件、CSP の具体値、NFR-1 との費用整合性検証、Security Compliance）、tech-stack-decisions.md（既存 ADR への参照、本ステージの決定 9 件、依存パッケージ一覧、バージョン固定方針、却下した選択肢）。ADR を 3 件追加: ADR-011（CSP は script 厳格・style のみ緩和）、ADR-012（ヘッダは CloudFront で付与しオリジンを遮断。デプロイ用 IAM のリソースワイルドカードを SECURITY-06 の意図的な例外として記録）、ADR-013（WAF を使わずキャッシュ・同時実行上限・予算アラートで代替。可用性を犠牲に費用を守る選択であることを明記）。上位要件に NFR-S8 / NFR-S9 を追加。CON-3 を解決済みに更新。Application Design の `SecurityHeaders` ミドルウェアを `VerifyCloudFrontOrigin` に差し替え（components.md / component-methods.md）。NFR-S1 の検証方法をトレーサビリティ表で更新。Security Compliance: 準拠 10 / N/A 4 / 準拠（例外あり）1 / ブロッキング所見なし。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Requirements Step 6
+
+---
+
+## CONSTRUCTION / UoW-1: NFR Requirements 承認プロンプト提示
+**Timestamp**: 2026-08-22T10:50:00Z
+**User Input**: N/A（承認待ち）
+**AI Response**: 標準の 2 択完了メッセージを提示（Request Changes / Continue to Next Stage）。次ステージは UoW-1 の NFR Design。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Requirements Step 7〜8
+
+---
+
+## CONSTRUCTION / UoW-1: Request Changes（ログ保持期間）
+**Timestamp**: 2026-08-22T11:05:00Z
+**User Input**: "各種アクセスログ・ログの保管期限は14日としてください"
+**AI Response**: 変更要求を受領。SECURITY-14（ログ保持は最低 90 日）との非準拠を検出したため、要件の変更を保留し、`aidlc-docs/construction/plans/uow-1-foundation-nfr-requirements-clarification-questions.md` を作成して確認を求めた。SECURITY-06 と異なり SECURITY-14 には例外規定が無いため、14 日への変更は「ADR への文書化」では解消できず、Security 拡張の部分的な無効化にあたる旨を明示。判断材料として、CloudWatch Logs の保存料に基づく費用差（14 日と 90 日で月 1 円程度）と、調査可能期間が 2 週間に短縮される実害を提示。選択肢 A（90 日維持）/ B（14 日 + SECURITY-14 のログ保持要件を適用外）/ C（アプリログ 14 日・アクセスログ 90 日）/ D（30 日）を提示。**要件ファイルは未変更のまま維持**。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Requirements Step 8（承認プロセスの繰り返し）
+
+---
+
+## SECURITY FINDING（未解決）
+**Timestamp**: 2026-08-22T11:05:00Z
+**Rule**: SECURITY-14（Alerting and Monitoring / Log retention）
+**Description**: ユーザーからログ保持期間を 14 日とする指示を受けたが、SECURITY-14 はアプリケーションロググループの保持期間を最低 90 日と定めている。現行の U1-OB-4 は 90 日で準拠しているため、14 日へ変更すると非準拠となる。SECURITY-14 には SECURITY-06 のような例外規定が無い。
+**Stage Context**: CONSTRUCTION / UoW-1 / NFR Requirements
+**Status**: 未解決。clarification-questions.md の回答待ち。解消するまで「Continue to Next Stage」を提示しない
+**Context**: Blocking security finding
+
+---
+
+## SECURITY FINDING（解決済み / 拡張の適用範囲変更）
+**Timestamp**: 2026-08-22T11:20:00Z
+**Rule**: SECURITY-14（Log retention）
+**User Input**: "入力しました"
+（clarification-questions.md への記入内容 — 完全な生の回答）
+Q1: "B
+個人開発、かつ、ポートフォリオのためコストを優先する"
+Q2: "A,B,C"
+**Resolution**: ログ保持期間を 14 日とし、SECURITY-14 のログ保持要件（最低 90 日）のみを適用対象外とする。同ルールの他の項目（ロググループ削除権限を与えない等）は引き続き適用。ADR-014 を作成し、理由として ① 監査要件の不在 ② 運用の簡素化 ③ 費用の抑制 の 3 点を記録。ただし費用については、現在の想定規模では 14 日と 90 日の差が月 1 円程度であることを ADR に正確に明記し、「現在の削減効果ではなく増加時の上限として意味を持つ」と位置づけた（ユーザーの回答をそのまま根拠として書くと、実額と整合しない記述になるため）。`aidlc-docs/aidlc-state.md` の Extension Configuration に「Security Baseline: Yes（一部適用外あり）」および適用外項目の表を追加。`docs/requirements.md` の NFR-S3 を 14 日に更新。UoW-1 の nfr-requirements.md に U1-OB-8（S3 ライフサイクル 14 日）を追加し、Security Compliance の SECURITY-14 判定を「部分的に適用外」に変更。
+**Status**: **解決済み**。拡張の適用範囲変更として明示的に記録。ブロッキング解除
+**Context**: CONSTRUCTION / UoW-1 / NFR Requirements
+
+---

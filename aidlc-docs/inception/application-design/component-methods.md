@@ -300,20 +300,32 @@ final readonly class PortfolioController
 }
 ```
 
-### `App\Http\Middleware\SecurityHeaders`
+### `App\Http\Middleware\VerifyCloudFrontOrigin`
 
 ```php
-final class SecurityHeaders
+final class VerifyCloudFrontOrigin
 {
+    public function __construct(
+        private ?string $expectedSecret,
+    ) {}
+
     public function handle(Request $request, Closure $next): Response;
 }
 ```
 
 | メソッド | 目的 | 入力 | 出力 |
 |---|---|---|---|
-| `handle()` | レスポンスに NFR-S1 のヘッダを付与する | `Request`, `Closure` | `Response` |
+| `handle()` | CloudFront 経由でないリクエストを 403 で拒否する | `Request`, `Closure` | `Response` |
 
-**備考**: ヘッダ値と CSP の具体は NFR Design（UoW-1）で確定する。
+**振る舞い**
+1. `$expectedSecret` が `null`（ローカル開発）なら素通りする
+2. リクエストヘッダから共有シークレットを取り出す
+3. `hash_equals()` で比較し、一致しなければ 403 を返す
+4. 拒否をログに記録する（**シークレットの値は出力しない**: SECURITY-03）
+
+**備考**: セキュリティヘッダ（NFR-S1）は CloudFront の Response Headers Policy で
+付与するため、Laravel 側には `SecurityHeaders` ミドルウェアを置かない（ADR-012）。
+ヘッダ名と CSP の具体値は `nfr-requirements.md` §4 に記載。
 
 ---
 

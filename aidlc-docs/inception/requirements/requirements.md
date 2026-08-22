@@ -96,7 +96,7 @@ portfolio2026/
 |---|---|---|---|
 | **CON-1** | AWS 認証情報が未設定（Q5=B） | **Bolt B-2（デプロイ）が実行できない。** B-2 は「動く URL を先に確保する」意図で前倒し配置されている | Workflow Planning でこの依存の扱いを決める（下記 3 案） |
 | CON-2 | ホストに PHP・Composer が無い | `composer install` を Docker 経由で実行する必要がある | ADR-007 の手順で対応済み |
-| CON-3 | CSP を `unsafe-inline` なしで運用する場合、Vite のビルド出力と衝突する可能性 | NFR-S1 が実装時に破綻する恐れ | 実装時に nonce 方式か例外文書化のいずれかを選択（ADR-010 に記載） |
+| ~~CON-3~~ | ~~CSP を `unsafe-inline` なしで運用する場合の衝突~~ | — | **解決済み**（2026-08-22）。ADR-011 で `style-src` にのみ `'unsafe-inline'` を許可し、`script-src` は厳格に維持 |
 | CON-4 | Security ベースラインのログ要件（NFR-S2, NFR-S3）が NFR-1 の費用目標に増分を与える | 月額数円〜十数円の見込み | 両立しない場合は ADR-010 を見直す |
 | RISK-1 | `content/*.md` は本人にしか書けない実データ。文面の最終確認が必要 | 公開内容の正確性 | 公開前に本人が確認 |
 
@@ -113,7 +113,9 @@ portfolio2026/
 | 要件 | 出所 | 検証方法 |
 |---|---|---|
 | NFR-1〜6 | `docs/requirements.md` §3 | 完了条件 §7 |
-| NFR-S1 | ADR-010 / SECURITY-04 | レスポンスヘッダの Feature テスト |
+| NFR-S1 | ADR-010 / SECURITY-04 | CloudFront の Response Headers Policy 設定のレビュー + デプロイ後に実 URL で確認（ADR-012 により Laravel 側では付与しないため Feature テストの対象外） |
+| NFR-S8 | ADR-012 / SECURITY-04, 09 | 共有シークレット不一致で 403 になることの Feature テスト |
+| NFR-S9 | ADR-013 / SECURITY-11 | `serverless.yml` の同時実行上限とキャッシュ設定のレビュー、AWS Budgets の設定確認 |
 | NFR-S2 | ADR-010 / SECURITY-02 | `serverless.yml` のログ設定レビュー |
 | NFR-S3 | ADR-010 / SECURITY-03, 14 | ログ設定とリテンション設定のレビュー |
 | NFR-S4 | ADR-010 / SECURITY-06 | IAM ポリシー定義のレビュー |

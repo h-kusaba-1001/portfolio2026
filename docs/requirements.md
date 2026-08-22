@@ -37,11 +37,13 @@ AI-DLC の Security ベースライン拡張を有効にしたことによる要
 |---|---|
 | NFR-S1 | HTML を返す全レスポンスに CSP・HSTS・X-Content-Type-Options・X-Frame-Options・Referrer-Policy を付与する（SECURITY-04） |
 | NFR-S2 | CloudFront と API Gateway のアクセスログを有効にする（SECURITY-02） |
-| NFR-S3 | アプリケーションログを構造化し、CloudWatch Logs に集約する。ログ保持期間を 90 日以上に設定する（SECURITY-03, SECURITY-14） |
+| NFR-S3 | アプリケーションログを構造化し、CloudWatch Logs に集約する。ログ保持期間は 14 日とする（SECURITY-03 / SECURITY-14 のログ保持要件は適用外: ADR-014） |
 | NFR-S4 | IAM ポリシーは最小権限とし、ワイルドカードのアクション・リソースを使わない（SECURITY-06） |
 | NFR-S5 | 依存はロックファイルで固定し、脆弱性スキャンをビルド手順に含める。Docker イメージタグを `latest` で固定しない（SECURITY-10） |
 | NFR-S6 | 本番でスタックトレース・内部パス・フレームワークバージョンを返さない。グローバルエラーハンドラを持つ（SECURITY-09, SECURITY-15） |
 | NFR-S7 | S3 バケットはパブリックアクセスをブロックし、CloudFront 経由でのみ配信する（SECURITY-01, SECURITY-09） |
+| NFR-S8 | CloudFront を経由しないリクエストを拒否する。オリジン（API Gateway）への直アクセスを塞ぐ（SECURITY-04, SECURITY-09 / ADR-012） |
+| NFR-S9 | 濫用対策として、CloudFront のキャッシュ・Lambda 同時実行数の上限・予算アラートを設ける。AWS WAF は使わない（SECURITY-11 / ADR-013） |
 
 **NFR-1 との関係**: NFR-S2・NFR-S3 はログ保存に伴う費用が発生する。この規模では
 月額数円〜十数円の範囲に収まる見込みで、NFR-1 の「月 100 円以下」とは両立する。

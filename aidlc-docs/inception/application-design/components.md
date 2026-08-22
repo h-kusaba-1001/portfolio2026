@@ -175,16 +175,22 @@ Application 層の関心事とする。表示方針が変わってもアダプ�
 分離しても得るものがないため（ADR-004 の判断基準を適用）。
 変換ロジックはコントローラ内の private メソッドに閉じる。
 
-### SecurityHeaders（ミドルウェア）
+### VerifyCloudFrontOrigin（ミドルウェア）
 
-**目的**: NFR-S1 のセキュリティヘッダを全 HTML レスポンスに付与する。
+**目的**: CloudFront を経由しないリクエストを 403 で拒否する（NFR-S8 / ADR-012）。
 
 **責務**
-- `Content-Security-Policy` / `Strict-Transport-Security` / `X-Content-Type-Options` /
-  `X-Frame-Options` / `Referrer-Policy` の付与
+- CloudFront がオリジンリクエストに付与する共有シークレットヘッダの検証
+- 一致しない場合の 403 応答
+- ローカル開発時（シークレット未設定時）の素通り
 
-**備考**: 実装方式（ミドルウェア vs CloudFront レスポンスヘッダポリシー）と
-CSP と Vite の両立方式は NFR Design（UoW-1）で決める（CON-3）。
+**備考**: セキュリティヘッダ（NFR-S1）の付与は **Laravel 側では行わない**。
+CloudFront の Response Headers Policy で付与する（ADR-012）。
+当初はこの位置に `SecurityHeaders` ミドルウェアを置く設計だったが、
+UoW-1 の NFR Requirements で方針を変更した。
+
+**セキュリティ**: 共有シークレットの値をログ・例外メッセージに出力しない（SECURITY-03）。
+比較は `hash_equals()` で行う（タイミング攻撃の回避）。
 
 ---
 

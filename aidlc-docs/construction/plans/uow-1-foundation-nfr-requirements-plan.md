@@ -221,13 +221,19 @@ X) Other (please describe after [Answer]: tag below)
 
 ## Part 2: 実行ステップ（回答後に実施）
 
-- [ ] 回答の分析（曖昧・矛盾がないか検証。あれば追加質問）
-- [ ] `aidlc-docs/construction/uow-1-foundation/nfr-requirements/nfr-requirements.md` を生成
-      （スケーラビリティ、性能、可用性、セキュリティ、信頼性、保守性、ユーザビリティの各要件）
-- [ ] `aidlc-docs/construction/uow-1-foundation/nfr-requirements/tech-stack-decisions.md` を生成
-      （技術選定とその根拠。ADR との対応）
-- [ ] NFR-1（費用）との整合性を検証
-- [ ] Security Compliance（SECURITY-01〜15）を評価
-- [ ] 新たな技術的決定が生じた場合は `docs/architecture-decisions.md` に ADR を追加
-- [ ] `aidlc-docs/aidlc-state.md` を更新
-- [ ] `aidlc-docs/audit.md` に記録
+- [x] 回答の分析（曖昧・矛盾がないか検証。あれば追加質問）
+      → SECURITY-04 のブロッキング所見を検出。Question 3-a（回答 = B）で解消
+- [x] `aidlc-docs/construction/uow-1-foundation/nfr-requirements/nfr-requirements.md` を生成
+      （スケーラビリティ、性能、可用性、セキュリティ、信頼性、可観測性、保守性、ユーザビリティ）
+- [x] `aidlc-docs/construction/uow-1-foundation/nfr-requirements/tech-stack-decisions.md` を生成
+      （技術選定とその根拠。ADR との対応、依存パッケージ、却下した選択肢）
+- [x] NFR-1（費用）との整合性を検証
+      → 両立見込み。最大の増加要因は CloudFront アクセスログの S3 保存料
+- [x] Security Compliance（SECURITY-01〜15）を評価
+      → 準拠 10 / N/A 4 / 準拠（例外あり）1。ブロッキング所見なし
+- [x] 新たな技術的決定が生じた場合は `docs/architecture-decisions.md` に ADR を追加
+      → ADR-011（CSP）、ADR-012（ヘッダ付与位置とオリジン遮断）、ADR-013（濫用対策）を追加
+- [x] 上位要件に NFR-S8 / NFR-S9 を追加、CON-3 を解決済みに更新
+- [x] Application Design の `SecurityHeaders` を `VerifyCloudFrontOrigin` に差し替え
+- [x] `aidlc-docs/aidlc-state.md` を更新
+- [x] `aidlc-docs/audit.md` に記録

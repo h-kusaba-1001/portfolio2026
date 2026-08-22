@@ -40,12 +40,22 @@
 ## Extension Configuration
 | Extension | Enabled | Decided At |
 |---|---|---|
-| Security Baseline | Yes | Requirements Analysis |
+| Security Baseline | Yes（一部適用外あり） | Requirements Analysis |
 | Resiliency Baseline | No | Requirements Analysis |
 | Property-Based Testing | No | Requirements Analysis |
 
 根拠は ADR-010（`docs/architecture-decisions.md`）。
 Security 有効化に伴い、`security-baseline.md` をロード済み。全ステージで強制する。
+
+### Security Baseline の適用外項目
+| Rule | 適用外の範囲 | 決定 | 根拠 |
+|---|---|---|---|
+| SECURITY-14 | **ログ保持期間の最低 90 日要件のみ**（14 日とする）。同ルールの他の項目は適用する | CONSTRUCTION / UoW-1 / NFR Requirements | ADR-014 |
+
+### 文書化された例外（ルールが例外を認めている範囲）
+| Rule | 例外の内容 | 根拠 |
+|---|---|---|
+| SECURITY-06 | デプロイ用 IAM ポリシーのリソースをワイルドカードとする（CloudFormation が未作成リソースを操作するため限定困難）。Lambda 実行ロールは最小権限を維持 | ADR-012 |
 
 ## Key Decisions（Requirements Analysis で確定）
 - スコープ: UoW-1 〜 UoW-4 の全て
@@ -78,7 +88,7 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ### 🟢 CONSTRUCTION PHASE
 - [ ] Functional Design — EXECUTE（UoW-2 のみ）
-- [ ] NFR Requirements — EXECUTE（UoW-1 のみ）※進行中
+- [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認待ち
 - [ ] NFR Design — EXECUTE（UoW-1 のみ）
 - [ ] Infrastructure Design — EXECUTE（UoW-1 のみ）
 - [ ] Code Generation — EXECUTE（UoW-1〜4）
@@ -89,9 +99,18 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: INCEPTION
-- **Current Stage**: CONSTRUCTION - UoW-1 / NFR Requirements
+- **Current Stage**: CONSTRUCTION - UoW-1 / NFR Requirements Complete
 - **Next Stage**: UoW-1 の NFR Design
-- **Status**: 質問回答待ち
+- **Status**: 承認待ち
+
+## UoW-1 で確定した主要決定
+- リージョン `ap-northeast-1` / Lambda メモリ 512 MB / 同時実行上限 10
+- CSP: `script-src 'self'` 厳格、`style-src` のみ `'unsafe-inline'`（ADR-011）
+- セキュリティヘッダは CloudFront で付与、オリジン直アクセスは共有シークレットで遮断（ADR-012）
+- AWS WAF を使わず、キャッシュ + 同時実行上限 + 予算アラートで濫用対策（ADR-013）
+- JSON 構造化ログ、ログ保持は一律 14 日（ADR-014。SECURITY-14 のログ保持要件は適用外）
+- デプロイ IAM は専用ポリシー（リソースはワイルドカード。SECURITY-06 の例外として記録）
+- 依存スキャンは `composer audit` / `npm audit`、SBOM は CycloneDX
 
 ## Unit Progress
 | Unit | ディレクトリ | 状態 |
