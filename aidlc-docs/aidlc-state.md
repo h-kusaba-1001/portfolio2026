@@ -91,7 +91,7 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] NFR Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
-- [ ] Code Generation — EXECUTE（UoW-1〜4）※**UoW-1 完了（承認待ち）**、UoW-2〜4 未着手
+- [ ] Code Generation — EXECUTE（UoW-1〜4）※**UoW-1・UoW-2 完了**、UoW-3・UoW-4 未着手
 - [ ] Build and Test — EXECUTE
 
 ### 🟡 OPERATIONS PHASE
@@ -99,9 +99,9 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: UoW-2 / Code Generation Part 1（計画）
-- **Next Stage**: UoW-2 の Code Generation Part 2（生成）
-- **Status**: 計画の承認待ち
+- **Current Stage**: UoW-2 / Code Generation 完了（本番反映済み）
+- **Next Stage**: UoW-3（静的セクション）または UoW-4（構成図）— 並行可能
+- **Status**: 承認待ち
 
 ## 🌐 公開 URL
 **https://d3bttkxchvfb66.cloudfront.net**（スタック `hk-portfolio-prod` / `ap-northeast-1`）
@@ -158,7 +158,7 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 | Unit | ディレクトリ | 状態 |
 |---|---|---|
 | UoW-1 基盤構築 | `aidlc-docs/construction/uow-1-foundation/` | **完了・承認済み（2026-08-22 デプロイ済み）** |
-| UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | Functional Design 承認済み / Code Generation 計画中 |
+| UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | **完了（B-3 合格・デプロイ済み）**。承認待ち |
 | UoW-3 静的セクション | `aidlc-docs/construction/uow-3-sections/` | 未着手 |
 | UoW-4 構成図 | `aidlc-docs/construction/uow-4-diagram/` | 未着手 |
 
@@ -188,3 +188,16 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 1. 全ノードの `key` が `stack.md` の `blocks` に実在することを検証するテスト
 2. 不一致時は「この要素の説明はまだありません」を表示して画面を壊さない
 3. ノード定義を PHP からも読める形（JSON 等）に置くことの検討
+
+## UoW-2 の実装状況（2026-08-22 完了）
+- Domain 10 / Application 1 / Infrastructure 3 ファイル + 設定・DI・コントローラ
+- **テスト 23 passed（120 assertions）**。T-1〜T-10 を全て実装
+- **B-3 合格**: `content/*.md` の編集が画面に反映されることを実測
+- 本番反映済み。4 セクション全て `available: true`
+- 実装中に見つけた問題 3 件（Δ-8〜Δ-10）を implementation-summary.md §3 に記録
+
+## ⚠️ 運用上の注意（UoW-2 で判明）
+- **コンテナ内でファイルを作る操作は `-u sail` で行うこと。** root で実行すると
+  `vendor/` `node_modules/` が root 所有になり、`sail` の各コマンドが軒並み失敗する（Δ-9）
+- **デプロイは `./bin/deploy.sh` を使うこと。** `composer install --no-dev` は
+  `laravel/sail` 自体を消すため、その後 `sail ...` を呼ぶ手順は必ず失敗する（Δ-10）

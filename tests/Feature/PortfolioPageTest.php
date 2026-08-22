@@ -14,11 +14,42 @@ it('トップページが 200 を返し、Portfolio コンポーネントを描�
         );
 });
 
-it('UoW-1 時点では sections が空である', function () {
-    // UoW-2 でコンテンツ基盤を実装した時点で、このテストは書き換える。
-    // 「まだ実装していない」ことを明示的に固定しておく。
+it('4 セクションが表示順で渡る', function () {
+    // UoW-1 では「sections が空である」ことを固定していたが、
+    // UoW-2 でコンテンツ基盤を実装したため書き換えた。
     $this->get('/')
         ->assertInertia(
-            fn (AssertableInertia $page) => $page->where('sections', [])
+            fn (AssertableInertia $page) => $page
+                ->has('sections', 4)
+                ->where('sections.0.id', 'stack')
+                ->where('sections.1.id', 'experience')
+                ->where('sections.2.id', 'career')
+                ->where('sections.3.id', 'next')
+        );
+});
+
+it('props に内部情報が含まれない', function () {
+    $response = $this->get('/');
+
+    $body = $response->getContent();
+
+    // ファイルパス・更新時刻・例外情報を props に載せない（NFR-S6）
+    expect($body)
+        ->not->toContain('/var/www/html')
+        ->not->toContain(base_path())
+        ->not->toContain('mtime');
+});
+
+it('各セクションが必要なキーを持つ', function () {
+    $this->get('/')
+        ->assertInertia(
+            fn (AssertableInertia $page) => $page
+                ->has('sections.0', fn (AssertableInertia $section) => $section
+                    ->has('id')
+                    ->has('title')
+                    ->has('available')
+                    ->has('lead')
+                    ->has('blocks')
+                )
         );
 });

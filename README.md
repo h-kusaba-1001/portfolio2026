@@ -117,25 +117,26 @@ http://localhost で表示される。停止は `./vendor/bin/sail down`。
 ### 手順
 
 ```bash
-# 1. SSO ログイン（トークンが切れていたら）
+# SSO ログイン（トークンが切れていたら）
 aws sso login --profile portfolio
 
-# 2. 依存の脆弱性チェック（NFR-S5 / SECURITY-10）
-sail composer audit
-sail npm audit --omit=dev
-
-# 3. フロントエンドのビルド
-sail npm run build
-
-# 4. 本番用に開発依存を除外
-sail composer install --no-dev --optimize-autoloader
-
-# 5. デプロイ
-sail npm run deploy
-
-# 6. 開発依存を戻す
-sail composer install
+# デプロイ
+./bin/deploy.sh
 ```
+
+`bin/deploy.sh` が次を順に実行する。
+
+1. `composer audit` / `npm audit --omit=dev`（NFR-S5 / SECURITY-10）
+2. `npm run build`
+3. `composer install --no-dev --optimize-autoloader`
+4. `osls deploy --stage prod`
+5. **開発依存を戻す**（失敗しても必ず実行される）
+
+**スクリプトにしている理由**: `composer install --no-dev` は
+**`laravel/sail` 自体を vendor から削除する**ため、その直後に
+`sail ...` を呼ぶ手順は必ず失敗する。加えて、途中で失敗すると
+開発依存が欠けたままの作業ツリーが残る。この 2 つを避けるため、
+`docker compose` を直接使い、終了時に必ず開発依存を戻している。
 
 ### 確認・撤去
 

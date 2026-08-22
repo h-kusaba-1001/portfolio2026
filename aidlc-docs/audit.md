@@ -575,3 +575,47 @@ Security Compliance: 準拠 5（SECURITY-05, 09, 11, 13, 15）/ N/A 10 / ブロ�
 **Context**: CONSTRUCTION フェーズ / UoW-2 / Code Generation Part 1 Step 1〜4
 
 ---
+
+## CONSTRUCTION / UoW-2: Code Generation Plan - Approval
+**Timestamp**: 2026-08-22T15:30:00Z
+**AI Prompt**: "承認いただければ Part 2（生成）に入ります"
+**User Response**: "承認！
+デプロイまでやっちゃってください"
+**Status**: Approved（Step 12 のデプロイも実施する方針で確定）
+**Context**: CONSTRUCTION フェーズ / UoW-2 / Code Generation Part 1 完了
+
+---
+
+## CONSTRUCTION / UoW-2: Code Generation Part 2（生成）実施
+**Timestamp**: 2026-08-22T15:30:00Z〜
+**User Input**: N/A
+**AI Response**: Step 1〜12 を全て実行。`league/commonmark` 2.10 を追加。Domain 層 10 ファイル（`SectionId` / `HeadingKey` / `ContentBlock` / `Section` / `PortfolioContent` / `ParsedMarkdown` / `ContentUnavailable` / `ContentUnavailableReason` / ポート 2 つ）、Application 層 1（`GetPortfolioContent`）、Infrastructure 層 3（`CommonMarkParser` / `MarkdownContentRepository` / `CachedContentRepository`）、`config/content.php`、DI 3 件、`PortfolioController::toProps()`、`Portfolio.tsx` の暫定表示を実装。テスト T-1〜T-10 を実装し **23 passed（120 assertions）**。設計の規則番号 R-1〜R-7 をコードのコメントとテスト名に対応させた。
+
+**設計に無い防御を 1 件追加**: `CommonMarkParser` がコードフェンス（```）内の `##` を見出しと誤認しないようにした。現在のコンテンツにコードフェンスは無いが、技術構成の説明にコード例を足す可能性が高く、そのとき静かに壊れる類の問題のため。
+
+**B-3 の完了判定**: `content/next.md` にマーカーを追記 → 画面に反映されることを確認 → 復元。合格。
+
+**デプロイ**: 91 秒で成功。本番で 4 セクション全て `available: true`、セキュリティヘッダ 5 件維持を確認。
+**Context**: CONSTRUCTION フェーズ / UoW-2 / Code Generation Part 2 Step 10〜13
+
+---
+
+## CONSTRUCTION / UoW-2: 実装中に見つかった問題 3 件
+**Timestamp**: 2026-08-22T16:00:00Z
+**User Input**: N/A
+**AI Response**: Δ-8: `config/content.php` で `app()->environment()` を呼んだところ、設定読み込み時点でコンテナが未準備のため `Target class [env] does not exist` で **22 テストが一斉に失敗**。`env('APP_ENV') !== 'local'` に変更して解消。
+
+Δ-9: 私が `docker compose exec`（root）で composer / npm を実行していたため、`vendor/` と `node_modules/` が **root 所有**（50,246 ファイル）になり、`sail` ユーザーで動く `sail npm run build` が EACCES、`sail composer require` も書き込みで失敗していた。`chown -R sail:sail` で修正し、`sail composer` / `sail npm` / `sail exec` の全てが通ることを確認。**コンテナ内でファイルを作る操作は `-u sail` で行う**という運用上の注意を aidlc-state.md に記録。
+
+Δ-10: **README に書いたデプロイ手順が、そのままでは必ず失敗することが判明**。`composer install --no-dev` は `laravel/sail` 自体を vendor から削除するため、直後の `sail npm run deploy` が `./vendor/bin/sail: not found` になる。加えて途中で失敗すると開発依存が欠けたままの作業ツリーが残る。対応として `bin/deploy.sh` を作成し、`docker compose` を直接使い `trap ... EXIT` でどこで失敗しても開発依存を戻すようにした。README のデプロイ手順も書き換え、スクリプトにしている理由を明記。
+**Context**: CONSTRUCTION フェーズ / UoW-2 / Code Generation
+
+---
+
+## CONSTRUCTION / UoW-2: Code Generation 承認プロンプト提示
+**Timestamp**: 2026-08-22T16:00:00Z
+**User Input**: N/A（承認待ち）
+**AI Response**: 標準の 2 択完了メッセージを提示。次は UoW-3（静的セクション）または UoW-4（構成図）。両者は並行可能。
+**Context**: CONSTRUCTION フェーズ / UoW-2 / Code Generation Step 14〜15
+
+---
