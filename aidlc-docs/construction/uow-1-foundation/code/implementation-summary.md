@@ -152,3 +152,144 @@ Set-Cookie: hk-portfolio-session=...
 | `resources/js/types/index.ts` | `SectionProps` / `ContentBlock` の形を定義済み。UoW-2 のサーバ実装と対応させる |
 | `resources/js/pages/Portfolio.tsx` | 最小表示。UoW-3 / UoW-4 がセクションを追加する |
 | `tests/Feature/PortfolioPageTest.php` | 「UoW-1 時点では sections が空」を固定するテストあり。**UoW-2 で書き換えが必要** |
+
+---
+
+## 8. デプロイ結果（Bolt B-2 / 2026-08-22）
+
+**成功。** スタック `hk-portfolio-prod`（`ap-northeast-1`）。
+
+| 項目 | 値 |
+|---|---|
+| 公開 URL | https://d3bttkxchvfb66.cloudfront.net |
+| CloudFront Distribution | `E1A7E0WUMFC77G` |
+| API Gateway（オリジン） | https://75j6557rjj.execute-api.ap-northeast-1.amazonaws.com |
+| Lambda | `hk-portfolio-prod-web`（16 MB パッケージ / 512 MB / 実測 Max Memory 138 MB / 実行 18.8 ms） |
+| S3 | `...-websiteassets...`（アセット）、`...-accesslogsbucket-...`（ログ）、`...-serverlessdeploymentbucket-...` |
+
+### デプロイに至るまでの失敗（2 回）
+
+| # | 失敗内容 | 原因 | 対応 |
+|---|---|---|---|
+| 1 | `cloudformation:DescribeStacks` で AccessDenied（14 秒で停止、リソース作成なし） | 権限セット `portfolioDeploy` に IAM 補助ポリシーだけが入っており、CloudFormation・Lambda・S3 などの土台権限が無かった | `docs/deploy-iam-policy.json` を単体で成立する完全版に書き直し |
+| 2 | `CREATE_FAILED: WebLambdaFunction` — `ReservedConcurrentExecutions ... below its minimum value of [10]` | **アカウントの Lambda 同時実行上限が 10**（新規アカウントの初期値）。10 を予約すると未予約分が 0 になり拒否される | 予約をやめ、アカウント上限を天井として使う（**ADR-016**） |
+
+### 検証結果（V-1〜V-10）
+
+| # | 項目 | 結果 |
+|---|---|---|
+| V-1 | 公開 URL にアクセスできる | ✅ 200 |
+| V-2 | セキュリティヘッダ 5 件 | ✅ 全て付与。`X-Powered-By` も出ていない |
+| V-3 | HTTP → HTTPS リダイレクト | ✅ 301 |
+| V-4 | 静的アセットが S3 から配信される | ✅ 配信を確認（`/build/*` は CachingOptimized ポリシー） |
+| V-5 | HTML が 60 秒キャッシュされる | ❌ **未達**（下記 P-2 参照） |
+| V-6 | S3 が直接アクセスできない | ✅ 両バケットともパブリックアクセスを全ブロック |
+| V-7 | アプリログが JSON で出る | ⚠️ **未確認**。正常系ではアプリログが出ないため実物を確認できていない |
+| V-8 | ロググループの保持が 14 日 | ✅ `/aws/lambda/hk-portfolio-prod-web` = 14 日 |
+| V-9 | CloudFront アクセスログが S3 に出る | ✅ 設定を確認（配信まで最大 1 時間かかるため、ファイルの実物は未確認） |
+| V-10 | エラーページに内部情報が出ない | ✅ 404。内部パス・スタックトレースの出現 0 |
+
+### D-1 の本番確認
+
+CloudFront の設定を実機で確認したところ、`extensions` によるログ設定が反映されていた。
+
+```json
+{ "Enabled": true, "IncludeCookies": false,
+  "Bucket": "hk-portfolio-prod-accesslogsbucket-0yaahbibia5t.s3.amazonaws.com",
+  "Prefix": "cloudfront/" }
+```
+
+`osls package` 時に CDK が出す「参照先が存在しない」警告は、やはり**誤検知**だった。
+
+---
+
+## 9. 未解決の問題（更新）
+
+### ⚠️ P-2: HTML が CloudFront にキャッシュされない（V-5 未達）
+
+**実測**
+
+```
+cache-control: no-cache, private
+x-cache: Miss from cloudfront   （連続アクセスでも常に Miss）
+```
+
+**原因**: Lift が Lambda 側のビヘイビアに **AWS 管理ポリシー `CachingDisabled`**
+（`4135ea2d-6df8-44a3-9df3-4b5a84be39ad`）を適用している。
+このポリシーはオリジンの `Cache-Control` を一切参照せず、常にキャッシュしない。
+
+```
+DefaultCacheBehavior  -> CachePolicyId: CachingDisabled     ← HTML
+/build/*              -> CachePolicyId: CachingOptimized    ← 静的アセット
+```
+
+**影響**: U1-PF-4（HTML を 60 秒キャッシュ）と、NFR-S9 の濫用対策のうち
+「キャッシュで Lambda 到達を減らす」部分（Q8 = C）が機能していない。
+
+**補足**: アプリ側で `Cache-Control` を返すだけでは解決しない。
+`CachingDisabled` はオリジンのヘッダを見ないため、**キャッシュポリシーの差し替えが必須**。
+
+**対応案**（判断が必要）
+- **案 A**: `extensions.distribution` で `DefaultCacheBehavior.CachePolicyId` を
+  `CachingOptimized`（`658327ea-f89d-4fab-a63d-7e88639e58f6`）に差し替え、
+  併せてアプリ側で `Cache-Control: public, max-age=60` を返す。
+  D-1 と同じ手法で、実績のあるやり方
+- **案 B**: 独自のキャッシュポリシーを作成し、TTL を明示的に 60 秒に固定する
+- **案 C**: U1-PF-4 を取り下げる。**アカウントの同時実行上限 10（ADR-016）が
+  費用の天井として働いているため、濫用対策としては最低限成立している**
+
+### ⚠️ V-7: アプリログの形式が未確認
+
+正常系ではアプリケーションログが出力されないため、JSON 形式で出ているかを本番で確認できていない。
+設定（`LOG_STDERR_FORMATTER`）は投入済み。
+UoW-2 以降でエラーが発生した際、または意図的に確認する機会に検証する。
+
+なお、ローカルの `.env` に同じ設定が無く、**ローカルだけ行ベースのログ形式**になっていたため、
+`.env.example` と `.env` に `LOG_STDERR_FORMATTER` を追加して本番と揃えた（P-6 の趣旨）。
+
+---
+
+## 10. デプロイ用 IAM 権限の内訳（初回のみ必要なもの）
+
+`docs/deploy-iam-policy.json` の内容を、**初回デプロイでのみ必要なもの**と
+**継続的に必要なもの**に分けた整理。
+
+### 初回デプロイでのみ使われたもの
+
+| アクション | 用途 |
+|---|---|
+| `cloudformation:CreateStack` | スタックの新規作成 |
+| `iam:CreateRole` / `iam:PutRolePolicy` / `iam:TagRole` | Lambda 実行ロールの作成 |
+| `s3:CreateBucket` / `s3:PutBucketPolicy` / `s3:PutBucketOwnershipControls` / `s3:PutBucketPublicAccessBlock` / `s3:PutEncryptionConfiguration` / `s3:PutLifecycleConfiguration` | 3 つの S3 バケットの作成と設定 |
+| `cloudfront:CreateDistribution` / `cloudfront:CreateOriginAccessControl` / `cloudfront:CreateCachePolicy` | ディストリビューションの作成 |
+| `apigateway:POST` | HTTP API の作成 |
+| `budgets:CreateBudget` | 予算の作成 |
+| `lambda:CreateFunction` | 関数の作成 |
+
+### 2 回目以降も必要なもの
+
+| アクション | 用途 |
+|---|---|
+| `cloudformation:UpdateStack` / `DescribeStacks` / `DescribeStackEvents` / `DescribeStackResource*` / `GetTemplate` / `ValidateTemplate` | スタックの更新と状態確認 |
+| `lambda:UpdateFunctionCode` / `UpdateFunctionConfiguration` / `GetFunction` / `PublishVersion` | 関数の更新 |
+| `s3:PutObject` / `GetObject` / `ListBucket` / `DeleteObject` | デプロイパッケージとアセットのアップロード・入れ替え |
+| `cloudfront:GetDistribution*` / `UpdateDistribution` / `CreateInvalidation` | ディストリビューションの更新 |
+| `iam:GetRole` / `iam:PassRole` | ロールの参照と Lambda への引き渡し |
+| `apigateway:GET` / `PATCH` / `PUT` | API の更新 |
+| `logs:*` | ロググループの作成・保持設定 |
+
+### 削除時にのみ必要なもの（`osls remove`）
+
+`cloudformation:DeleteStack`、`iam:DeleteRole` / `DeleteRolePolicy`、
+`lambda:DeleteFunction`、`s3:DeleteBucket`、`cloudfront:DeleteDistribution`、
+`budgets:DeleteBudget`
+
+### 絞り込むときの注意
+
+**安易に `Create*` を削らないこと。** CloudFormation は変更内容によって
+リソースを「置換（削除して再作成）」することがある。
+たとえば Lambda 関数名やバケット名に影響する変更を入れると、
+2 回目以降のデプロイでも `Create*` と `Delete*` の両方が必要になる。
+
+**推奨**: 現行のポリシーを維持する。どうしても絞るなら、
+`osls remove` を使う予定が無い場合に **削除系のみ**を外すのが安全。
