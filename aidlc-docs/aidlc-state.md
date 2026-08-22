@@ -73,12 +73,12 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [x] Requirements Analysis — 承認済み（2026-08-22）
 - [x] User Stories — SKIP（US-1〜7 が既存）
 - [x] Workflow Planning — 承認済み（2026-08-22）
-- [x] Application Design — 承認待ち
+- [x] Application Design — 承認済み（2026-08-22）
 - [ ] Units Generation — SKIP（UoW-1〜4 が既存）
 
 ### 🟢 CONSTRUCTION PHASE
 - [ ] Functional Design — EXECUTE（UoW-2 のみ）
-- [ ] NFR Requirements — EXECUTE（UoW-1 のみ）
+- [ ] NFR Requirements — EXECUTE（UoW-1 のみ）※進行中
 - [ ] NFR Design — EXECUTE（UoW-1 のみ）
 - [ ] Infrastructure Design — EXECUTE（UoW-1 のみ）
 - [ ] Code Generation — EXECUTE（UoW-1〜4）
@@ -89,9 +89,17 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: INCEPTION
-- **Current Stage**: Application Design Complete
-- **Next Stage**: CONSTRUCTION PHASE / UoW-1 の NFR Requirements（Units Generation は SKIP）
-- **Status**: 承認待ち
+- **Current Stage**: CONSTRUCTION - UoW-1 / NFR Requirements
+- **Next Stage**: UoW-1 の NFR Design
+- **Status**: 質問回答待ち
+
+## Unit Progress
+| Unit | ディレクトリ | 状態 |
+|---|---|---|
+| UoW-1 基盤構築 | `aidlc-docs/construction/uow-1-foundation/` | NFR Requirements 進行中 |
+| UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | 未着手 |
+| UoW-3 静的セクション | `aidlc-docs/construction/uow-3-sections/` | 未着手 |
+| UoW-4 構成図 | `aidlc-docs/construction/uow-4-diagram/` | 未着手 |
 
 ## Application Design で確定した設計判断
 - レイヤ: Domain / Application / Infrastructure / Http（軽量 3 層 + ポート）

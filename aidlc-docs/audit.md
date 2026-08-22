@@ -179,3 +179,20 @@ Q6-a: "A"
 **Context**: INCEPTION フェーズ / Application Design 未確定事項の解決。ステージの明示承認は未取得のため、承認プロンプトを再提示する
 
 ---
+
+## Application Design - Approval
+**Timestamp**: 2026-08-22T10:20:00Z
+**AI Prompt**: "Approve & Continue - 設計を承認し、CONSTRUCTION PHASE（UoW-1 の NFR Requirements）へ進む"
+**User Response**: "承認"
+**Status**: Approved
+**Context**: INCEPTION フェーズ完了。Units Generation の追加要望なし。CONSTRUCTION フェーズへ移行
+
+---
+
+## CONSTRUCTION / UoW-1: NFR Requirements 計画と質問の提示
+**Timestamp**: 2026-08-22T10:20:00Z
+**User Input**: N/A（承認済みにより自動進行）
+**AI Response**: `construction/nfr-requirements.md` をロードして実行。ユニット別ディレクトリを作成（uow-1-foundation / uow-2-content / uow-3-sections / uow-4-diagram / build-and-test）。`aidlc-docs/construction/plans/uow-1-foundation-nfr-requirements-plan.md` を作成（質問 8 問）。主要論点: (1) AWS リージョン未定 (2) CON-3 の解決 = CSP の厳格度と UoW-4 のアニメーション実装制約のトレードオフ (3) セキュリティヘッダの付与場所 (4) ログ形式 (5) Lambda メモリ (6) デプロイ IAM と SECURITY-06 最小権限の現実的な折り合い (7) 脆弱性スキャンと SBOM (8) SECURITY-11 レート制限と NFR-1 費用目標の衝突（AWS WAF は月 5〜8 ドルの固定費）。前提の逸脱（Functional Design 未実行での NFR Requirements 実行）は承認済み実行計画に基づく旨を計画書に明記。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Requirements Step 1〜4
+
+---
