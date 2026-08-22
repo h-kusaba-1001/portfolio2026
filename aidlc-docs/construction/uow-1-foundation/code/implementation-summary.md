@@ -1,7 +1,7 @@
 # Implementation Summary — UoW-1（基盤構築）
 
 **実施日**: 2026-08-22
-**状態**: **B-1（ローカル起動）完了。B-2（デプロイ）未実施**
+**状態**: **B-1（ローカル起動）完了 / B-2（デプロイ）完了。公開 URL: https://d3bttkxchvfb66.cloudfront.net**
 
 ---
 
@@ -293,3 +293,66 @@ UoW-2 以降でエラーが発生した際、または意図的に確認する�
 
 **推奨**: 現行のポリシーを維持する。どうしても絞るなら、
 `osls remove` を使う予定が無い場合に **削除系のみ**を外すのが安全。
+
+---
+
+## 11. デプロイ後の追加対応（ユーザー要望）
+
+### 11-1. Laravel Boost の導入
+
+`laravel/boost` 2.5 を dev 依存として追加し、`php artisan boost:install` を実行。
+
+| 生成物 | 内容 |
+|---|---|
+| `CLAUDE.md` の `<laravel-boost-guidelines>` ブロック | Laravel 13 / PHP 8.4 に合わせたガイドライン（218 行の追記） |
+| `.claude/skills/` | 6 スキル（inertia-react-development / laravel-best-practices / pest-testing / tailwindcss-development / octane-development / infer-conventions） |
+| `.mcp.json` | Boost の MCP サーバ設定 |
+| `boost.json` | Boost の設定 |
+
+**確認したこと**: `CLAUDE.md` 冒頭の **AI-DLC ワークフローは上書きされていない**。
+Boost の追記はタグで囲まれた末尾への追加のみで、`boost:update` で
+そのブロックだけが差し替えられる構造になっている。
+
+### 11-2. Sail の Node バージョン固定
+
+Sail のランタイム Dockerfile は `ARG NODE_VERSION=24` を既定値として持つ。
+Sail 側の更新で既定が変わると環境が揺れるため、`compose.yaml` の build args で
+**明示的に `NODE_VERSION: '24'` を指定**した（NFR-S5 / SECURITY-10）。
+
+なおホストの Node は v20.12.2 で、**osls 4（`^20.19.0 || ^22.13.0 || >=24`）と
+Vite 8 の要求を満たさない**。npm 系のコマンドは必ずコンテナ内で実行する。
+
+### 11-3. Sail からビルド・デプロイできるようにした
+
+**変更点**
+
+1. `compose.yaml` に環境変数の受け渡しを追加
+   （`AWS_PROFILE` / `AWS_REGION` / `BUDGET_ALERT_EMAIL` / `APP_KEY`）。
+   Docker Compose が同ディレクトリの `.env` を読むため、値は `.env` に置く
+2. `${HOME}/.aws` を `/home/sail/.aws` に**読み取り専用**でマウント
+3. `package.json` に npm スクリプトを追加
+   （`typecheck` / `deploy` / `deploy:info` / `deploy:package` / `deploy:remove`）
+
+**検証**: `sail npx osls info --stage prod` が SSO の認証情報を使って
+本番スタックの情報を取得できることを確認した。
+
+**セキュリティ上の判断**: 認証情報をコンテナに見せることになるが、
+① 読み取り専用 ② 長期のアクセスキーではなく SSO の一時トークン
+③ 個人の開発機である、の 3 点から許容した（SECURITY-12）。
+`.env` に置くのも同じ理由で、**シークレットそのものは含まれない**
+（`AWS_PROFILE` はプロファイル名、`BUDGET_ALERT_EMAIL` はメールアドレス）。
+`.env` は `.gitignore` 済み。
+
+### 11-4. ローカルのログ形式を本番に合わせた
+
+`LOG_STDERR_FORMATTER` が `serverless.yml` にしか無く、
+**ローカルだけ行ベース**のログになっていた。`.env` / `.env.example` に追加して揃えた（P-6）。
+
+### 11-5. 回帰確認
+
+| 項目 | 結果 |
+|---|---|
+| `sail exec laravel.test ./vendor/bin/pest` | 11 passed（52 assertions） |
+| `sail npm run typecheck` | エラーなし |
+| 本番 URL | 200 |
+| ローカル | 200 |

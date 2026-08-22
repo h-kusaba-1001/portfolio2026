@@ -9,6 +9,11 @@ services:
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
+                # Node のバージョンを明示的に固定する（NFR-S5 / SECURITY-10）。
+                # Sail 側の既定値に依存すると、Sail の更新で勝手に変わりうる。
+                # ホストの Node（v20）は osls 4 と Vite 8 の要求を満たさないため、
+                # npm 系のコマンドは必ずこのコンテナ内で実行すること。
+                NODE_VERSION: '24'
         image: sail-8.4/app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
@@ -21,8 +26,18 @@ services:
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
+            # --- デプロイ（osls）をコンテナ内から実行するための設定 ---
+            # 値は .env から取り込まれる（Docker Compose が同ディレクトリの .env を読む）
+            AWS_PROFILE: '${AWS_PROFILE:-portfolio}'
+            AWS_REGION: '${AWS_REGION:-ap-northeast-1}'
+            BUDGET_ALERT_EMAIL: '${BUDGET_ALERT_EMAIL:-}'
+            APP_KEY: '${APP_KEY:-}'
         volumes:
             - '.:/var/www/html'
+            # AWS の認証情報を読み取り専用でマウントする。
+            # SSO の一時トークン（~/.aws/sso/cache）を使うため、長期のアクセスキーは持ち込まない。
+            # 変更したときは `sail down && sail up -d` でコンテナを作り直すこと。
+            - '${HOME}/.aws:/home/sail/.aws:ro'
         networks:
             - sail
 networks:

@@ -2,6 +2,8 @@
 
 月額 100 円未満で動く、サーバレスなポートフォリオサイト。
 
+**公開 URL**: https://d3bttkxchvfb66.cloudfront.net
+
 
 ## 何が動いているか
 
@@ -69,46 +71,97 @@ http://localhost で表示される。停止は `./vendor/bin/sail down`。
 
 データベースを持たない（ADR-002）ため、Sail のサービスはアプリケーションコンテナのみ。
 
-### テスト
+### 日常的に使うコマンド
 
-```bash
-./vendor/bin/sail exec laravel.test ./vendor/bin/pest
-```
+すべて Sail 経由（コンテナ内）で実行する。`alias sail='./vendor/bin/sail'` を張っておくと短い。
 
-### 型チェック
+| 目的 | コマンド |
+|---|---|
+| 起動 / 停止 | `sail up -d` / `sail down` |
+| フロントの開発サーバ | `sail npm run dev` |
+| ビルド | `sail npm run build` |
+| テスト | `sail exec laravel.test ./vendor/bin/pest` |
+| 型チェック | `sail npm run typecheck` |
+| 依存の脆弱性チェック | `sail composer audit` / `sail npm audit --omit=dev` |
+| Artisan | `sail artisan <command>` |
 
-```bash
-./vendor/bin/sail npx tsc --noEmit
-```
+**ホストの Node は使わないこと。** osls 4 と Vite 8 は Node 20.19 以上を要求するため、
+ホストのバージョンによっては動かない。Sail のコンテナは Node 24 に固定してある。
 
 ## デプロイ
 
-デプロイ前に AWS の認証情報を用意する（IAM Identity Center の一時認証情報を想定）。
+### 前提（初回のみ）
+
+1. **AWS の認証情報**（IAM Identity Center / SSO）
+
+   ```bash
+   aws configure sso --profile portfolio
+   aws sso login --profile portfolio
+   ```
+
+   `~/.aws` はコンテナに読み取り専用でマウントされる（`compose.yaml`）。
+   長期のアクセスキーは使わず、SSO の一時トークンを利用する。
+
+2. **デプロイ用の権限**
+
+   `docs/deploy-iam-policy.json` を IAM Identity Center の権限セットに
+   カスタマー管理ポリシーとして設定する。
+   `PowerUserAccess` だけでは IAM ロールを作成できないため足りない。
+
+3. **`.env` の設定**
+
+   `AWS_PROFILE` / `AWS_REGION` / `BUDGET_ALERT_EMAIL` を設定する。
+   これらは `compose.yaml` 経由でコンテナに渡り、`serverless.yml` が参照する。
+   変更したら `sail down && sail up -d` でコンテナを作り直すこと。
+
+### 手順
 
 ```bash
-export APP_KEY=...              # .env の値をそのまま使う
-export BUDGET_ALERT_EMAIL=...   # 予算アラートの通知先
+# 1. SSO ログイン（トークンが切れていたら）
+aws sso login --profile portfolio
 
-# 依存の脆弱性チェック（NFR-S5）
-./vendor/bin/sail exec laravel.test composer audit
-./vendor/bin/sail exec laravel.test npm audit --omit=dev
+# 2. 依存の脆弱性チェック（NFR-S5 / SECURITY-10）
+sail composer audit
+sail npm audit --omit=dev
 
-# フロントエンドのビルド
-./vendor/bin/sail npm run build
+# 3. フロントエンドのビルド
+sail npm run build
 
-# 本番用に開発依存を除外してから固める
-./vendor/bin/sail exec laravel.test composer install --no-dev --optimize-autoloader
+# 4. 本番用に開発依存を除外
+sail composer install --no-dev --optimize-autoloader
 
-npx osls deploy --stage prod
+# 5. デプロイ
+sail npm run deploy
 
-# 開発依存を戻す
-./vendor/bin/sail exec laravel.test composer install
+# 6. 開発依存を戻す
+sail composer install
 ```
+
+### 確認・撤去
+
+```bash
+sail npm run deploy:info      # 公開 URL とスタックの状態
+sail npm run deploy:package   # CloudFormation テンプレートの生成（AWS に触らない）
+sail npm run deploy:remove    # スタックごと削除
+```
+
+**初回デプロイは CloudFront の作成に 10〜20 分かかる。** 2 回目以降は 4〜5 分程度。
 
 Serverless Framework v4 ではなく `osls` を使う。理由は ADR-001 を参照。
 
-デプロイ内容の確認だけなら `npx osls print --stage prod`、
-生成される CloudFormation テンプレートの確認は `npx osls package --stage prod`。
+## AI 支援の設定
+
+[Laravel Boost](https://laravel.com/docs/boost) を導入している。
+`php artisan boost:install` により、このリポジトリで作業する AI エージェント向けに
+Laravel のバージョンに合わせたガイドラインとスキル（Inertia + React、Pest、Tailwind など）、
+および MCP サーバが設定されている。
+
+- ガイドライン: `CLAUDE.md` の `<laravel-boost-guidelines>` ブロック
+- スキル: `.claude/skills/`
+- MCP: `.mcp.json`
+
+Boost のガイドラインを最新化するには `sail artisan boost:update`。
+**`CLAUDE.md` 冒頭の AI-DLC ワークフローは Boost とは別物**で、上書きされない。
 
 ## ドキュメント
 

@@ -473,3 +473,35 @@ Q1: "A
 **Context**: CONSTRUCTION フェーズ / UoW-1 / Code Generation Step 14〜15
 
 ---
+
+## CONSTRUCTION / UoW-1: Bolt B-2（デプロイ）実施
+**Timestamp**: 2026-08-22T13:40:00Z〜
+**User Input**: "デプロイしてくれていいんだけれど、何が必要？" / "aws configure sso --profile portfolio ... これ実行しました デプロイ手順は忘れないように覚えておいてくださいね BUDGET_ALERT_EMAIL=jojo1889jojo@gmail.com にして！ 案 A: web グループからセッション・CSRF を外す これ解決してからデプロイしてほしい！" / "JSONを元に、portfolioDeployのSSOを作りセットしました 確認してください" / "変更した！portfolioDeployの中を 初回デプロイ時のみ必要であれば、あとでJSONを変えるのでデプロイ後に教えて！ あとは初回デプロイ時に何が必要だったのかを残すようにして下し亜"
+**AI Response**: デプロイに必要な 3 点（AI のシェルから見える AWS 認証情報 / BUDGET_ALERT_EMAIL / デプロイ権限）を提示。認証情報をチャットに貼らない方針を明示し、SSO プロファイル方式を推奨。デプロイ手順を記憶（`~/.claude/projects/.../memory/portfolio2026-deploy-and-docker.md`）に保存。
+
+**P-1（Set-Cookie）を案 A で解決**: `web` グループからセッション・CSRF を除去。実装中に **Laravel 13 で CSRF ミドルウェアが `ValidateCsrfToken` から `PreventRequestForgery` に改名されている**ことが判明（旧名で remove しても外れず、セッション不在で 500 になった）。修正後、テスト 11 passed / Set-Cookie 0 件 / status 200 を確認。回帰防止に `tests/Feature/CacheabilityTest.php` を追加。
+
+**デプロイ試行 1（失敗）**: PowerUserAccess では `iam:CreateRole` が使えないことを事前に実測で確認し、ユーザーに報告。専用権限セット `portfolioDeploy` 作成後に実行したが、`cloudformation:DescribeStacks` で AccessDenied（14 秒、リソース作成なし）。原因は、渡した JSON が「PowerUserAccess に足りない IAM 部分だけを補う」設計だったのに、単体の権限セットとして設定されたため。`docs/deploy-iam-policy.json` を単体で成立する完全版に書き直し。
+
+**デプロイ試行 2（失敗）**: 権限は通過し実リソース作成まで進んだが `CREATE_FAILED: WebLambdaFunction`。`ReservedConcurrentExecutions ... below its minimum value of [10]`。実測で **アカウントの Lambda 同時実行上限が 10**（新規アカウントの初期値）と判明。予約自体が不可能なため `reservedConcurrency` を削除し、**ADR-016**（アカウント上限を天井として使う）を追加。ADR-013 の目的は「費用の総量に上限を与えること」であり手段ではない、という整理を記録。
+
+**デプロイ試行 3（成功）**: 268 秒で完了。公開 URL https://d3bttkxchvfb66.cloudfront.net
+
+**検証 V-1〜V-10**: 合格 8（200 応答 / セキュリティヘッダ 5 件 / HTTPS リダイレクト / アセット配信 / S3 パブリックアクセス全ブロック / ログ保持 14 日 / CloudFront アクセスログ設定 / エラーページの内部情報非漏洩）、**未達 1（V-5: HTML がキャッシュされない）**、未確認 1（V-7: 正常系ではアプリログが出ないため形式を確認できず）。
+
+**D-1 を本番で確認**: CloudFront の Logging が有効で `extensions` 指定のバケットを向いていた。`osls package` 時の CDK 警告は誤検知と確定。
+
+**P-2 を新たに検出（未解決）**: Lift が Lambda 側ビヘイビアに AWS 管理ポリシー `CachingDisabled` を適用しているため、アプリが `Cache-Control` を返しても CloudFront はキャッシュしない。U1-PF-4 と NFR-S9 のキャッシュ部分が未達。対応案 A/B/C を implementation-summary.md §9 に記載し、**計画外の変更のため実装せず判断を仰ぐ**。
+
+**初回デプロイに必要だった権限の内訳**を implementation-summary.md §10 に記録（初回のみ / 継続的に必要 / 削除時のみ の 3 分類、および CloudFormation がリソースを置換する場合に `Create*` が再び必要になる注意）。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / Code Generation Step 13
+
+---
+
+## CONSTRUCTION / UoW-1: デプロイ後の追加対応
+**Timestamp**: 2026-08-22T14:20:00Z
+**User Input**: "laravel boostを入れるようにして、セットアップも済ませておいてください そういやsailにnodeいれられるからsailにnodeのバージョンを併せるようにしてください 後デプロイ手順もreadmeに書いてください 指示以外の他の作業も引き続き行って大丈夫です" / "補足すると、sailでビルドとかデプロイも啞したいです"
+**AI Response**: (1) `laravel/boost` 2.5 を導入し `boost:install` を実行。スキル 6 件・MCP 設定・ガイドラインが生成された。**`CLAUDE.md` の AI-DLC ワークフローが上書きされていないことを確認**（Boost の追記はタグで囲まれた末尾追加のみ）。(2) Sail の `NODE_VERSION` を `compose.yaml` の build args で 24 に明示固定（Sail 側の既定値に依存しないため。NFR-S5）。(3) Sail からビルド・デプロイできるよう、`compose.yaml` に環境変数の受け渡しと `~/.aws` の読み取り専用マウントを追加し、`package.json` に npm スクリプト（typecheck / deploy / deploy:info / deploy:package / deploy:remove）を追加。`sail npx osls info --stage prod` が SSO 認証で動作することを検証。(4) README のセットアップ・コマンド一覧・デプロイ手順を全面的に書き直し。(5) `LOG_STDERR_FORMATTER` がローカルに無く本番と形式が違っていたため `.env` / `.env.example` に追加。回帰確認: テスト 11 passed / 型チェック通過 / 本番 200 / ローカル 200。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / デプロイ後の追加作業
+
+---

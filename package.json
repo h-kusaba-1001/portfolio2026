@@ -4,7 +4,12 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "typecheck": "tsc --noEmit",
+        "deploy": "osls deploy --stage prod",
+        "deploy:info": "osls info --stage prod",
+        "deploy:package": "osls package --stage prod",
+        "deploy:remove": "osls remove --stage prod"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

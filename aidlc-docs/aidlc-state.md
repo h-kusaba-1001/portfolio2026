@@ -4,7 +4,7 @@
 - **Project Name**: portfolio2026（HK Portfolio）
 - **Project Type**: Greenfield
 - **Start Date**: 2026-08-22T08:51:01Z
-- **Current Stage**: INCEPTION - Workflow Planning
+- **Current Stage**: CONSTRUCTION - UoW-1 完了 / UoW-2 未着手
 
 ## Workspace State
 - **Existing Code**: No（Markdown ドキュメントのみ。ソースコード・ビルドファイルなし）
@@ -66,7 +66,7 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - SSR: 導入しない。OGP・meta は Blade で静的出力
 
 ## Open Constraints
-- **CON-1**: AWS 認証情報が未設定 → Bolt B-2（デプロイ）が実行不可。Workflow Planning で順序を決定する
+- ~~**CON-1**: AWS 認証情報が未設定~~ → **解消済み**（IAM Identity Center / プロファイル `portfolio`）
 
 ## Execution Plan Summary
 - **Total Stages**: 13（INCEPTION 7 + CONSTRUCTION 6）
@@ -91,17 +91,20 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] NFR Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
-- [ ] Code Generation — EXECUTE（UoW-1〜4）※UoW-1 の Part 1（計画）で承認待ち
+- [ ] Code Generation — EXECUTE（UoW-1〜4）※**UoW-1 完了（承認待ち）**、UoW-2〜4 未着手
 - [ ] Build and Test — EXECUTE
 
 ### 🟡 OPERATIONS PHASE
 - [ ] Operations（プレースホルダ）
 
 ## Current Status
-- **Lifecycle Phase**: INCEPTION
-- **Current Stage**: CONSTRUCTION - UoW-1 / Code Generation Part 2（生成）完了
-- **Next Stage**: UoW-1 の Bolt B-2（デプロイ。ユーザー実行）→ UoW-2 の Functional Design
+- **Lifecycle Phase**: CONSTRUCTION
+- **Current Stage**: UoW-1 / Code Generation 完了（B-1・B-2 とも完了）
+- **Next Stage**: UoW-2 の Functional Design
 - **Status**: 承認待ち
+
+## 🌐 公開 URL
+**https://d3bttkxchvfb66.cloudfront.net**（スタック `hk-portfolio-prod` / `ap-northeast-1`）
 
 ## 実行環境
 Docker はグループ未所属で直接実行できないが、`sg docker -c '<コマンド>'` 経由で実行可能。**再ログイン不要**。
@@ -111,12 +114,16 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 - **B-1（ローカル起動）完了**。Laravel 13.26.1 / PHP 8.4.24 / Vite 8 / Inertia 3.3 / Pest 4 / Bref 3 / osls 4.1.0
 - テスト 9 件通過、型チェック通過、ビルド成功、脆弱性 0 件
 - `osls print` / `osls package` で `serverless.yml` の妥当性を検証済み
-- **B-2（デプロイ）未実施** — ユーザーの実行待ち
+- **B-2（デプロイ）完了**（2026-08-22）。失敗 2 回を経て成功: ① 権限セットに土台権限が無かった ② アカウントの Lambda 同時実行上限が 10 で予約ができなかった（ADR-016）
+- 検証 V-1〜V-10: 合格 8 / 未達 1（V-5 キャッシュ）/ 未確認 1（V-7 ログ形式）
+- Laravel Boost 導入、Sail の Node を 24 に固定、Sail からビルド・デプロイ可能に
 
 ## 未解決の問題
-- **P-1**: レスポンスに `Set-Cookie` が付き、CloudFront の HTML キャッシュ（U1-PF-4 / NFR-S9）が効かない可能性。認証もフォームも無いためセッション自体が不要。対応案 A/B/C を implementation-summary.md §6 に記載。**判断待ち**
-- **D-4**: デプロイ用 IAM ポリシー（実デプロイで確定）
-- **D-5**: `BUDGET_ALERT_EMAIL` の値
+- ~~**P-1**（Set-Cookie）~~ → **解決済み**。`web` グループからセッションと CSRF を除去（Laravel 13 では `PreventRequestForgery` に改名されている点に注意）
+- **P-2**: **HTML が CloudFront にキャッシュされない**（V-5 未達）。Lift が Lambda 側ビヘイビアに `CachingDisabled` を適用しているため、アプリが `Cache-Control` を返しても無視される。対応案 A/B/C を implementation-summary.md §9 に記載。**判断待ち**
+- **V-7**: アプリログの JSON 形式が本番で未確認（正常系ではログが出ないため）
+- ~~D-4~~ → 確定。`docs/deploy-iam-policy.json`。初回のみ必要な権限の内訳は implementation-summary.md §10
+- ~~D-5~~ → 確定。`jojo1889jojo@gmail.com`
 
 ## 解決済みの論点
 - ~~**オリジン方式**~~ → Q1 = A（Lift + HTTP API を維持）。直アクセスは閉じない。K-1 として拡張ポイントに図示
@@ -137,10 +144,10 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 - D-5: 予算アラートの通知先メールアドレス
 
 ## UoW-1 で確定した主要決定
-- リージョン `ap-northeast-1` / Lambda メモリ 512 MB / 同時実行上限 10
+- リージョン `ap-northeast-1` / Lambda メモリ 512 MB / 同時実行はアカウント上限 10 に委ねる（ADR-016）
 - CSP: `script-src 'self'` 厳格、`style-src` のみ `'unsafe-inline'`（ADR-011）
 - セキュリティヘッダは Laravel ミドルウェアで付与（ADR-015。ADR-012 を Superseded）
-- HTML は 60 秒キャッシュ、静的アセットは 1 年。Invalidation は使わない
+- HTML は 60 秒キャッシュの想定だったが **未達**（P-2）。静的アセットは CachingOptimized。Invalidation は使わない
 - エラーページは Inertia、429 はそのまま返す、相関 ID は Lambda リクエスト ID
 - AWS WAF を使わず、キャッシュ + 同時実行上限 + 予算アラートで濫用対策（ADR-013）
 - JSON 構造化ログ、ログ保持は一律 14 日（ADR-014。SECURITY-14 のログ保持要件は適用外）
@@ -150,7 +157,7 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 ## Unit Progress
 | Unit | ディレクトリ | 状態 |
 |---|---|---|
-| UoW-1 基盤構築 | `aidlc-docs/construction/uow-1-foundation/` | NFR Requirements 進行中 |
+| UoW-1 基盤構築 | `aidlc-docs/construction/uow-1-foundation/` | **完了（デプロイ済み）**。承認待ち |
 | UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | 未着手 |
 | UoW-3 静的セクション | `aidlc-docs/construction/uow-3-sections/` | 未着手 |
 | UoW-4 構成図 | `aidlc-docs/construction/uow-4-diagram/` | 未着手 |
