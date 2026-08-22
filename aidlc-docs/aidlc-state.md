@@ -4,7 +4,7 @@
 - **Project Name**: portfolio2026（HK Portfolio）
 - **Project Type**: Greenfield
 - **Start Date**: 2026-08-22T08:51:01Z
-- **Current Stage**: INCEPTION - Requirements Analysis
+- **Current Stage**: INCEPTION - Workflow Planning
 
 ## Workspace State
 - **Existing Code**: No（Markdown ドキュメントのみ。ソースコード・ビルドファイルなし）
@@ -58,20 +58,37 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 ## Open Constraints
 - **CON-1**: AWS 認証情報が未設定 → Bolt B-2（デプロイ）が実行不可。Workflow Planning で順序を決定する
 
+## Execution Plan Summary
+- **Total Stages**: 13（INCEPTION 7 + CONSTRUCTION 6）
+- **Stages to Execute**: Workspace Detection / Requirements Analysis / Workflow Planning / Application Design / Functional Design（UoW-2）/ NFR Requirements（UoW-1）/ NFR Design（UoW-1）/ Infrastructure Design（UoW-1）/ Code Generation（UoW-1〜4）/ Build and Test
+- **Stages to Skip**: Reverse Engineering（greenfield）/ User Stories（US-1〜7 が `docs/aidlc-inception.md` に既存）/ Units Generation（UoW-1〜4 が既存）
+- **Risk Level**: Medium
+- 詳細: `aidlc-docs/inception/plans/execution-plan.md`
+
 ## Stage Progress
 
 ### 🔵 INCEPTION PHASE
 - [x] Workspace Detection
-- [ ] Reverse Engineering — SKIPPED（greenfield のため）
-- [x] Requirements Analysis — 承認待ち
-- [ ] User Stories
-- [ ] Workflow Planning
-- [ ] Application Design
-- [ ] Units Generation
+- [x] Reverse Engineering — SKIPPED（greenfield のため）
+- [x] Requirements Analysis — 承認済み（2026-08-22）
+- [x] User Stories — SKIP（US-1〜7 が既存）
+- [x] Workflow Planning — 承認待ち
+- [ ] Application Design — EXECUTE
+- [ ] Units Generation — SKIP（UoW-1〜4 が既存）
 
 ### 🟢 CONSTRUCTION PHASE
-- [ ] Per-Unit Loop
-- [ ] Build and Test
+- [ ] Functional Design — EXECUTE（UoW-2 のみ）
+- [ ] NFR Requirements — EXECUTE（UoW-1 のみ）
+- [ ] NFR Design — EXECUTE（UoW-1 のみ）
+- [ ] Infrastructure Design — EXECUTE（UoW-1 のみ）
+- [ ] Code Generation — EXECUTE（UoW-1〜4）
+- [ ] Build and Test — EXECUTE
 
 ### 🟡 OPERATIONS PHASE
 - [ ] Operations（プレースホルダ）
+
+## Current Status
+- **Lifecycle Phase**: INCEPTION
+- **Current Stage**: Workflow Planning Complete
+- **Next Stage**: Application Design
+- **Status**: 承認待ち
