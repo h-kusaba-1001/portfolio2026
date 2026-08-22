@@ -147,7 +147,9 @@ aidlc-docs/
 ### Step 11: サプライチェーン対応（NFR-S5 / SECURITY-10）
 - [x] 11-1. `composer.lock` と `package-lock.json` がコミット対象であることを確認する
 - [x] 11-2. `composer audit` と `npm audit` を実行し、結果を記録する
-- [x] 11-3. CycloneDX による SBOM 生成の手順を用意する
+- [ ] 11-3. CycloneDX による SBOM 生成の手順を用意する
+      → **未実施。** 一括更新で誤ってチェック済みにしていたものを 2026-08-22 に訂正。
+        `docs/backlog.md` の S-1 として管理する
 - [x] 11-4. **D-3 の確認**: 本番デプロイ時に開発用依存を除外する手順を確定する
 
 ### Step 12: ローカル動作確認（B-1 の完了判定）
@@ -156,18 +158,18 @@ aidlc-docs/
 - [x] 12-3. ブラウザでセキュリティヘッダが付いていることを確認する
 
 ### Step 13: デプロイ（B-2）— **ユーザーが実行**
-- [ ] 13-1. **`BUDGET_ALERT_EMAIL`（D-5）を確認する**
-- [ ] 13-2. デプロイ用 IAM ポリシーの初期版を用意する（D-4。不足は実行しながら詰める）
-- [ ] 13-3. **ユーザーが `osls deploy --stage prod` を実行する**
-        （AWS 認証情報はユーザーの環境にあるため。私は実行しません）
+- [x] 13-1. **`BUDGET_ALERT_EMAIL`（D-5）を確認する** → `jojo1889jojo@gmail.com`
+- [x] 13-2. デプロイ用 IAM ポリシーの初期版を用意する → `docs/deploy-iam-policy.json`。**2 回失敗して確定**
+- [x] 13-3. デプロイ実行 → **成功**（3 回目）。ユーザーが SSO プロファイルを用意したため、
+        `AWS_PROFILE=portfolio` で私が実行した
 - [x] 13-4. **D-1 の確認**: Lift の `extensions` が `DistributionConfig.Logging` を
         期待どおりマージしたかを、生成された CloudFormation テンプレートで検証する
-- [ ] 13-5. `deployment-architecture.md` §4 の検証項目 V-1〜V-10 を実施する
+- [x] 13-5. 検証項目 V-1〜V-10 を実施 → **合格 9 / 未達 1（V-5 キャッシュ = P-2）**
 
 ### Step 14: ドキュメント更新
 - [x] 14-1. `README.md` のセットアップ手順を、実際に動いた手順へ更新する
       （**イメージタグの `latest` を固定タグへ修正する**）
-- [ ] 14-2. 公開 URL を README に記載する
+- [x] 14-2. 公開 URL を README に記載する → https://d3bttkxchvfb66.cloudfront.net
 - [x] 14-3. 実際に採用した Laravel のバージョンを記録する
 
 ### Step 15: 生成物の要約
@@ -269,8 +271,9 @@ X) Other (please describe after [Answer]: tag below)
 ## 7. 完了条件
 
 - [ ] Step 1〜16 の全チェックボックスが `[x]` になっている
+      → **11-3（SBOM）のみ未実施。`docs/backlog.md` の S-1 で管理**
 - [x] `sail test` が通る（9 passed / 48 assertions）
 - [x] ローカルでページが表示される（B-1）
-- [ ] 公開 URL でページが表示される（B-2）
-- [ ] 検証項目 V-1〜V-10 の結果が記録されている
+- [x] 公開 URL でページが表示される（B-2）
+- [x] 検証項目 V-1〜V-10 の結果が記録されている
 - [x] D-1〜D-5 の確認結果が記録されている（D-1〜D-3 は確定、D-4・D-5 はデプロイ時）

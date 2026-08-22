@@ -619,3 +619,37 @@ Security Compliance: 準拠 5（SECURITY-05, 09, 11, 13, 15）/ N/A 10 / ブロ�
 **Context**: CONSTRUCTION フェーズ / UoW-2 / Code Generation Step 14〜15
 
 ---
+
+## CONSTRUCTION / UoW-2: Code Generation - Approval
+**Timestamp**: 2026-08-22T16:10:00Z
+**AI Prompt**: "Continue to Next Stage - 承認し、UoW-3（静的セクション）へ進む"
+**User Response**: "OKです
+AI-DLCを取り入れたことも書いておきたいですが、いまではないので次に進めましょう
+P-2とV-7と同じく最後にまとめます
+残課題管理・TODOはどこかで分かるようにしておいてください
+✅ Continue to Next Stage" / "あと、やたらビルド&デプロイに時間がかかっているので短縮することも残課題として積んでください"
+**Status**: Approved
+**AI Response**: UoW-2 を承認済みとして記録。残課題管理として `docs/backlog.md` を新規作成し、README からリンク。積んだ項目: B-1〜B-3（UoW-3 / UoW-4 / 最終確認）、P-2（CloudFront キャッシュ）、**S-1（SBOM 未実施）**、V-7（ログ形式）、**I-1（ビルド・デプロイ時間の短縮。実測値と対応案 A〜E を記載）**、C-1（AI-DLC をサイトに書く）、K-1/K-2（意図的に対応しない）、UoW-4 の必須対応、運用上の注意 4 件。
+
+**記録の誤りを 1 件訂正**: UoW-1 の Step 11-3（CycloneDX による SBOM 生成手順）を、チェックボックスの一括更新で誤って `[x]` にしていた。実際には未実施であることを確認し `[ ]` に戻したうえで、backlog の S-1 として管理する形にした。
+
+**V-9 を本番で確認**: CloudFront のアクセスログが実際に S3 に配信されていることを確認（`cloudfront/E1A7E0WUMFC77G.2026-08-22-*.gz`）。UoW-1 のサマリを「設定を確認」から「実物のログファイルを確認」に更新。併せて UoW-1 のデプロイ関連チェックボックス（13-1・13-2・13-3・13-5・14-2）を実態に合わせて更新。
+**Context**: CONSTRUCTION フェーズ / UoW-2 完了。UoW-3 へ
+
+---
+
+## CONSTRUCTION / UoW-3: Code Generation（計画承認 + 生成 + デプロイ）
+**Timestamp**: 2026-08-22T16:30:00Z〜
+**User Input**: "答えた！ UoW-3を進めてください トークンの上限が近いので、細かくフェーズを切って進めてね"
+（uow-3-sections-code-generation-plan.md への記入）
+Q1: "C"（ダークモード: 自動 + 手動トグル）
+Q2: "C"（アクセントカラー: 緑系）
+Q3: "C"（上部に固定ヘッダ）
+**AI Response**: トークン節約のため 3 フェーズに分割して実行。フェーズ 1（Step 1〜3）: 色トークン 3 段構成（ライト / prefers-color-scheme / 明示クラス）、`.prose-basic`、フェードイン CSS、`usePrefersReducedMotion` / `useTheme` フック、共通コンポーネント 5 点。フェーズ 2（Step 4〜5）: セクションコンポーネント 4 点 + 固定ヘッダ + フッタ + `Portfolio.tsx` の再構成。S-2 は UoW-4 まで暫定表示のまま残した。フェーズ 3（Step 6〜9）: テスト 4 件追加（**27 passed / 159 assertions**）、`./bin/deploy.sh` で本番反映（**84 秒**。trap による開発依存の復元も動作確認）。
+
+**判断と報告**: (1) CSP `script-src 'self'` のためインラインスクリプトが使えず、テーマを明示指定した利用者は初回描画でちらつく可能性がある。既定（system）の利用者は CSS のみで切り替わるためちらつかない。ADR-011 の代償として許容し記録。(2) `@tailwindcss/typography` を導入せず `.prose-basic` を自前で記述（必要な要素が 6 種のみで、依存を増やす理由がないため。ADR-004 の判断基準）。(3) `usePrefersReducedMotion` を Application Design の想定（UoW-4）から前倒し。
+
+**B-4 の完了判定について**: 構造的には満たしている（モバイル基準の組み方、行長 42rem 制限、ナビはデスクトップのみ、タップ領域の確保）が、**375px での実際の見え方は目視確認できていない**。ブラウザテストを書かない方針（ADR-009）のため、`docs/backlog.md` に B-4 として「目視確認」を新規項目で積んだ。**できていないことを完了扱いにしない。**
+**Context**: CONSTRUCTION フェーズ / UoW-3 完了
+
+---

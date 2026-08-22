@@ -99,9 +99,12 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: UoW-2 / Code Generation 完了（本番反映済み）
-- **Next Stage**: UoW-3（静的セクション）または UoW-4（構成図）— 並行可能
+- **Current Stage**: UoW-3 / Code Generation 完了（本番反映済み）
+- **Next Stage**: **UoW-4（構成図アニメーション）** — 最後のユニット
 - **Status**: 承認待ち
+
+## 📋 残課題は `docs/backlog.md` に集約
+P-2（キャッシュ）/ S-1（SBOM 未実施）/ V-7（ログ形式）/ I-1（ビルド・デプロイ時間）/ C-1（AI-DLC をサイトに書く）ほか。**未解決事項はこのファイルを見れば分かる。**
 
 ## 🌐 公開 URL
 **https://d3bttkxchvfb66.cloudfront.net**（スタック `hk-portfolio-prod` / `ap-northeast-1`）
@@ -158,8 +161,8 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 | Unit | ディレクトリ | 状態 |
 |---|---|---|
 | UoW-1 基盤構築 | `aidlc-docs/construction/uow-1-foundation/` | **完了・承認済み（2026-08-22 デプロイ済み）** |
-| UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | **完了（B-3 合格・デプロイ済み）**。承認待ち |
-| UoW-3 静的セクション | `aidlc-docs/construction/uow-3-sections/` | 未着手 |
+| UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | **完了・承認済み（B-3 合格・デプロイ済み）** |
+| UoW-3 静的セクション | `aidlc-docs/construction/uow-3-sections/` | **完了（デプロイ済み）**。承認待ち |
 | UoW-4 構成図 | `aidlc-docs/construction/uow-4-diagram/` | 未着手 |
 
 ## Application Design で確定した設計判断

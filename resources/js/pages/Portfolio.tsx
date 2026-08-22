@@ -1,64 +1,119 @@
-import type { PortfolioPageProps, SectionProps } from '@/types';
+import ContentUnavailable from '@/components/content/ContentUnavailable';
+import MarkdownBlock from '@/components/content/MarkdownBlock';
+import ThemeToggle from '@/components/layout/ThemeToggle';
+import Section from '@/components/layout/Section';
+import Career from '@/components/sections/Career';
+import Experience from '@/components/sections/Experience';
+import Hero from '@/components/sections/Hero';
+import Next from '@/components/sections/Next';
+import type { PortfolioPageProps, SectionId, SectionProps } from '@/types';
 
 /**
- * UoW-2 時点の暫定表示。
+ * トップページ。単一ページ構成（Q4 = A）。
  *
- * 体裁は整えない。`content/*.md` の編集が画面に反映されること（B-3）を
- * 確認するための最小表示にとどめる。
- * 見た目は UoW-3（静的セクション）と UoW-4（構成図）で作り直す。
+ * S-2（技術構成）は UoW-4 で構成図に差し替えるため、
+ * ここでは暫定表示のまま残している。
  */
 export default function Portfolio({ sections }: PortfolioPageProps) {
-    return (
-        <main
-            className="min-h-screen bg-white px-6 py-16 text-slate-900"
-            data-testid="portfolio-page"
-        >
-            <div className="mx-auto max-w-2xl space-y-16">
-                <header>
-                    <h1 className="text-3xl font-semibold tracking-tight">HK Portfolio</h1>
-                    <p className="mt-3 text-slate-600">
-                        月額 100 円未満で動く、サーバレスなポートフォリオ
-                    </p>
-                </header>
+    const find = (id: SectionId): SectionProps | undefined =>
+        sections.find((section) => section.id === id);
 
-                {sections.map((section) => (
-                    <Section key={section.id} section={section} />
-                ))}
-            </div>
-        </main>
+    const stack = find('stack');
+    const experience = find('experience');
+    const career = find('career');
+    const next = find('next');
+
+    return (
+        <div className="min-h-screen">
+            <SiteHeader />
+
+            <main className="mx-auto max-w-3xl px-6 pb-28">
+                <Hero />
+
+                <div className="space-y-24">
+                    {stack !== undefined && <StackPlaceholder section={stack} />}
+                    {experience !== undefined && <Experience section={experience} />}
+                    {career !== undefined && <Career section={career} />}
+                    {next !== undefined && <Next section={next} />}
+                </div>
+            </main>
+
+            <SiteFooter />
+        </div>
     );
 }
 
-function Section({ section }: { section: SectionProps }) {
+/** 上部の固定ヘッダ（Q3 = C） */
+function SiteHeader() {
     return (
-        <section data-testid={`section-${section.id}`}>
-            <h2 className="text-xl font-semibold">{section.title}</h2>
+        <div className="sticky top-0 z-10 border-b border-[color:var(--border)] bg-[color:var(--bg)]/85 backdrop-blur">
+            <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
+                <a
+                    href="#top"
+                    className="text-sm font-semibold tracking-tight"
+                    data-testid="site-header-home"
+                >
+                    HK Portfolio
+                </a>
 
-            {!section.available ? (
-                <p className="mt-4 text-slate-500" data-testid={`section-${section.id}-unavailable`}>
-                    コンテンツを読み込めませんでした
-                </p>
-            ) : (
+                <div className="flex items-center gap-4">
+                    <nav className="hidden gap-4 text-sm text-[color:var(--fg-muted)] sm:flex">
+                        <a href="#stack" className="hover:text-[color:var(--fg)]">
+                            技術構成
+                        </a>
+                        <a href="#experience" className="hover:text-[color:var(--fg)]">
+                            やってきたこと
+                        </a>
+                        <a href="#career" className="hover:text-[color:var(--fg)]">
+                            キャリア
+                        </a>
+                        <a href="#next" className="hover:text-[color:var(--fg)]">
+                            これから
+                        </a>
+                    </nav>
+
+                    <ThemeToggle />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SiteFooter() {
+    return (
+        <footer className="border-t border-[color:var(--border)]">
+            <div className="mx-auto max-w-3xl px-6 py-8 text-sm text-[color:var(--fg-faint)]">
+                このサイトは AWS Lambda 上で動いています。ソースは GitHub に公開しています。
+            </div>
+        </footer>
+    );
+}
+
+/**
+ * S-2 の暫定表示。UoW-4 で ArchitectureDiagram に差し替える。
+ * ここでは lead とブロックを素朴に並べるだけ。
+ */
+function StackPlaceholder({ section }: { section: SectionProps }) {
+    return (
+        <Section id={section.id} title={section.title}>
+            {section.available ? (
                 <>
-                    {section.lead !== '' && (
-                        <div
-                            className="prose-basic mt-4"
-                            data-testid={`section-${section.id}-lead`}
-                            dangerouslySetInnerHTML={{ __html: section.lead }}
-                        />
-                    )}
+                    {section.lead !== '' && <MarkdownBlock html={section.lead} />}
 
-                    {section.blocks.map((block) => (
-                        <div key={block.key} className="mt-8" data-testid={`block-${block.key}`}>
-                            <h3 className="font-medium">{block.heading}</h3>
-                            <div
-                                className="prose-basic mt-2"
-                                dangerouslySetInnerHTML={{ __html: block.html }}
-                            />
-                        </div>
-                    ))}
+                    <div className="mt-8 space-y-8">
+                        {section.blocks.map((block) => (
+                            <div key={block.key} data-testid={`block-${block.key}`}>
+                                <h3 className="font-medium">{block.heading}</h3>
+                                <div className="mt-2">
+                                    <MarkdownBlock html={block.html} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </>
+            ) : (
+                <ContentUnavailable sectionId={section.id} />
             )}
-        </section>
+        </Section>
     );
 }

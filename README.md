@@ -169,6 +169,7 @@ Boost のガイドラインを最新化するには `sail artisan boost:update`�
 - [要件定義](docs/requirements.md)
 - [アーキテクチャ決定記録（ADR）](docs/architecture-decisions.md)
 - [AI-DLC / Inception 成果物](docs/aidlc-inception.md)
+- **[残課題 / TODO](docs/backlog.md)** — 未着手・未解決事項の一覧
 
 ## コンテンツの更新
 

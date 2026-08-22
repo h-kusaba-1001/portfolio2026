@@ -3,11 +3,15 @@
 @source '../../storage/framework/views/*.php';
 
 /*
-  外部フォント（bunny.net / Google Fonts）は使わない。
+  ダークモードはクラスで切り替える（Q1 = C: 自動 + 手動トグル）。
+  html.dark / html.light が明示指定、無ければ OS の設定に従う。
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  外部フォントは使わない。
   - CSP を font-src 'self' に保つため（ADR-011）
   - 外部リソースを読み込まない方針のため（SECURITY-13）
-  - 追加のネットワーク往復を発生させないため
-  日本語を含むため、OS 標準のフォントスタックで十分に読める。
 */
 @theme {
     --font-sans:
@@ -15,4 +19,150 @@
         'Noto Sans JP', Meiryo, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
     --font-mono:
         ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+/*
+  意味づけした色をトークンとして持ち、コンポーネント側は
+  ライト／ダークを意識しない。アクセントは緑系（Q2 = C）。
+*/
+:root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --bg-subtle: #f8fafc;
+    --fg: #0f172a;
+    --fg-muted: #475569;
+    --fg-faint: #94a3b8;
+    --border: #e2e8f0;
+    --accent: #047857;
+    --accent-hover: #065f46;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not(.light) {
+        color-scheme: dark;
+        --bg: #0b1120;
+        --bg-subtle: #111a2e;
+        --fg: #e2e8f0;
+        --fg-muted: #94a3b8;
+        --fg-faint: #64748b;
+        --border: #1e293b;
+        --accent: #34d399;
+        --accent-hover: #6ee7b7;
+    }
+}
+
+:root.dark {
+    color-scheme: dark;
+    --bg: #0b1120;
+    --bg-subtle: #111a2e;
+    --fg: #e2e8f0;
+    --fg-muted: #94a3b8;
+    --fg-faint: #64748b;
+    --border: #1e293b;
+    --accent: #34d399;
+    --accent-hover: #6ee7b7;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--fg);
+}
+
+/*
+  Markdown 由来の HTML に当てるスタイル。
+  @tailwindcss/typography は導入しない（必要な要素が限られており、
+  依存を増やす理由がないため。ADR-004 の判断基準）。
+*/
+.prose-basic {
+    color: var(--fg-muted);
+    line-height: 1.9;
+}
+
+.prose-basic > * + * {
+    margin-top: 1rem;
+}
+
+.prose-basic p {
+    /* 行長が伸びすぎないようにする（読みやすさ: NFR-4） */
+    max-width: 42rem;
+}
+
+.prose-basic strong {
+    color: var(--fg);
+    font-weight: 600;
+}
+
+.prose-basic ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.prose-basic li {
+    padding-left: 1.25rem;
+    position: relative;
+}
+
+.prose-basic li + li {
+    margin-top: 0.6rem;
+}
+
+.prose-basic li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.85em;
+    width: 0.4rem;
+    height: 1px;
+    background-color: var(--accent);
+}
+
+.prose-basic a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.prose-basic a:hover {
+    color: var(--accent-hover);
+}
+
+.prose-basic code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    padding: 0.1em 0.35em;
+}
+
+.prose-basic h3 {
+    color: var(--fg);
+    font-weight: 600;
+    margin-top: 1.5rem;
+}
+
+/*
+  スクロールフェードイン。
+  prefers-reduced-motion では最初から表示された状態にする
+  （アニメーションを止めても情報が読める: docs/requirements.md §6）。
+*/
+.fade-in {
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition:
+        opacity 0.5s ease-out,
+        transform 0.5s ease-out;
+}
+
+.fade-in[data-visible='true'] {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fade-in {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
 }
