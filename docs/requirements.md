@@ -28,17 +28,37 @@
 | NFR-5 | 独自ドメインは取得しない。CloudFront のデフォルトドメインで公開する |
 | NFR-6 | サーバサイドは要件が生じるまで実装しない。生じた場合に Lambda 関数の追加で拡張できる状態を保つ |
 
+### セキュリティ非機能要件
+
+AI-DLC の Security ベースライン拡張を有効にしたことによる要件（ADR-010）。
+括弧内は対応する SECURITY ルール ID。
+
+| ID | 要件 |
+|---|---|
+| NFR-S1 | HTML を返す全レスポンスに CSP・HSTS・X-Content-Type-Options・X-Frame-Options・Referrer-Policy を付与する（SECURITY-04） |
+| NFR-S2 | CloudFront と API Gateway のアクセスログを有効にする（SECURITY-02） |
+| NFR-S3 | アプリケーションログを構造化し、CloudWatch Logs に集約する。ログ保持期間を 90 日以上に設定する（SECURITY-03, SECURITY-14） |
+| NFR-S4 | IAM ポリシーは最小権限とし、ワイルドカードのアクション・リソースを使わない（SECURITY-06） |
+| NFR-S5 | 依存はロックファイルで固定し、脆弱性スキャンをビルド手順に含める。Docker イメージタグを `latest` で固定しない（SECURITY-10） |
+| NFR-S6 | 本番でスタックトレース・内部パス・フレームワークバージョンを返さない。グローバルエラーハンドラを持つ（SECURITY-09, SECURITY-15） |
+| NFR-S7 | S3 バケットはパブリックアクセスをブロックし、CloudFront 経由でのみ配信する（SECURITY-01, SECURITY-09） |
+
+**NFR-1 との関係**: NFR-S2・NFR-S3 はログ保存に伴う費用が発生する。この規模では
+月額数円〜十数円の範囲に収まる見込みで、NFR-1 の「月 100 円以下」とは両立する。
+両立しないことが判明した場合は ADR-010 を見直す。
+
 ## 4. 技術構成
 
 | レイヤ | 採用技術 | ADR |
 |---|---|---|
 | デプロイ | osls | ADR-001 |
-| ランタイム | Bref 3.0 + AWS Lambda | — |
+| ランタイム | Bref 3.0 + AWS Lambda（PHP 8.4） | ADR-007 |
 | アプリ | Laravel + Inertia.js | ADR-004 |
-| フロント | React + Tailwind CSS | ADR-006 |
+| フロント | React + Tailwind CSS（CSR。SSR なし） | ADR-006, ADR-008 |
 | 配信 | Lift `server-side-website` | ADR-005 |
 | データ | Markdown（`league/commonmark`） | ADR-002, ADR-003 |
-| 開発環境 | Laravel Sail（Docker） | ADR-007 |
+| 開発環境 | Laravel Sail（Docker、PHP 8.4） | ADR-007 |
+| テスト | Pest（ユニット + Feature） | ADR-009 |
 
 ## 5. サイト構成
 
