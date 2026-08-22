@@ -1,0 +1,149 @@
+# デプロイ定義（ADR-001: osls / ADR-005: Lift / ADR-007: Bref）
+#
+# 設計の出典: aidlc-docs/construction/uow-1-foundation/infrastructure-design/
+#
+# 注意: デプロイ前に以下の環境変数を export しておくこと
+#   APP_KEY               ローカルの .env に生成済みのもの、または別途生成した値
+#   BUDGET_ALERT_EMAIL    予算アラートの通知先
+
+service: hk-portfolio
+
+provider:
+    name: aws
+    region: ap-northeast-1
+    stage: ${opt:stage, 'prod'}
+    # Bref 3 は Amazon Linux 2023 のレイヤのみを提供する。
+    # provided.al2 を指定すると osls が起動時に弾く。
+    runtime: provided.al2023
+
+    # ログ保持は 14 日（ADR-014。SECURITY-14 のログ保持要件は適用外）
+    logRetentionInDays: 14
+
+    # API Gateway のアクセスログ（NFR-S2 / SECURITY-02）
+    logs:
+        httpApi: true
+
+    environment:
+        APP_ENV: production
+        APP_DEBUG: 'false' # NFR-S6 / SECURITY-09
+        APP_KEY: ${env:APP_KEY}
+        # Lift が公開する変数は url / cname / assetsBucketName の 3 つ。
+        # url はスキーム込み（https://dxxxx.cloudfront.net）で返る。
+        APP_URL: ${construct:website.url}
+
+        # JSON 構造化ログを stderr へ（U1-OB-1 / SECURITY-03）
+        LOG_CHANNEL: stderr
+        LOG_LEVEL: info
+        LOG_STDERR_FORMATTER: Monolog\Formatter\JsonFormatter
+
+        # データベースを持たない（ADR-002）
+        SESSION_DRIVER: array
+        QUEUE_CONNECTION: sync
+
+        # Lambda で書き込めるのは /tmp のみ（P-6）。
+        # ただし bref/laravel-bridge の BrefServiceProvider が
+        #   - useStoragePath('/tmp/storage')
+        #   - view.compiled          -> /tmp/storage/framework/views
+        #   - cache.stores.file.path -> /tmp/storage/framework/cache
+        # を自動で設定するため、こちらで指定するのは CACHE_STORE だけでよい（D-2 の確認結果）。
+        CACHE_STORE: file
+
+    # Lambda 実行ロールは CloudWatch Logs への書き込みのみ（NFR-S4 / SECURITY-06）。
+    # 追加のステートメントを書かないことで最小権限を維持する。
+    # ロググループの削除権限は与えない（SECURITY-14）。
+
+plugins:
+    - ./vendor/bref/bref
+    - serverless-lift
+
+package:
+    patterns:
+        # content/ は必ず含める（ADR-003: Markdown をデプロイパッケージに同梱）
+        - '!node_modules/**'
+        - '!tests/**'
+        - '!docs/**'
+        - '!aidlc-docs/**'
+        - '!.aidlc-rule-details/**'
+        - '!.git/**'
+        - '!storage/logs/**'
+        - '!storage/framework/cache/**'
+        - '!*.md'
+        - 'content/**'
+
+functions:
+    web:
+        handler: public/index.php
+        runtime: php-84-fpm # ADR-007
+        memorySize: 512 # Q5 = A
+        timeout: 28 # U1-PF-2（API Gateway HTTP API の上限 29 秒に合わせる）
+        # 予約済み同時実行数は設定しない（ADR-016）。
+        # このアカウントの Lambda 同時実行上限が 10 のため、10 を予約すると
+        # 未予約分が 0 になり AWS が要求する最低値 10 を割って拒否される。
+        # アカウント上限 10 がそのまま費用の天井として働くため、
+        # ADR-013 が求めた「費用を物理的に頭打ちにする」目的は満たされている。
+        # 上限が引き上げられた時点で、関数単位の予約を設定し直すこと。
+        events:
+            - httpApi: '*'
+
+constructs:
+    website:
+        type: server-side-website
+        assets:
+            '/build/*': public/build
+        extensions:
+            # Lift にはアクセスログの設定オプションが無いため、
+            # CloudFormation リソースを直接上書きする（F-3 / Q2 = A）
+            distribution:
+                Properties:
+                    DistributionConfig:
+                        Logging:
+                            Bucket: !GetAtt AccessLogsBucket.DomainName
+                            Prefix: cloudfront/
+                            IncludeCookies: false
+
+resources:
+    Resources:
+        # CloudFront アクセスログの保存先（NFR-S2 / SECURITY-02）
+        AccessLogsBucket:
+            Type: AWS::S3::Bucket
+            Properties:
+                # CloudFront の標準ログ（レガシー）は ACL を必要とする。
+                # 2023年4月以降の既定（BucketOwnerEnforced）のままだと配信されない。
+                # パブリックアクセスブロックとは別軸の設定であり、バケットは非公開のまま。
+                OwnershipControls:
+                    Rules:
+                        - ObjectOwnership: ObjectWriter
+                PublicAccessBlockConfiguration:
+                    BlockPublicAcls: true
+                    BlockPublicPolicy: true
+                    IgnorePublicAcls: true
+                    RestrictPublicBuckets: true
+                BucketEncryption:
+                    ServerSideEncryptionConfiguration:
+                        - ServerSideEncryptionByDefault:
+                              SSEAlgorithm: AES256 # NFR-S7 / SECURITY-01
+                LifecycleConfiguration:
+                    Rules:
+                        - Id: expire-access-logs
+                          Status: Enabled
+                          ExpirationInDays: 14 # ADR-014
+
+        # 費用の暴走を検知する（ADR-013 / U1-RL-4）
+        CostBudget:
+            Type: AWS::Budgets::Budget
+            Properties:
+                Budget:
+                    BudgetName: hk-portfolio-monthly
+                    BudgetType: COST
+                    TimeUnit: MONTHLY
+                    BudgetLimit:
+                        Amount: 1
+                        Unit: USD
+                NotificationsWithSubscribers:
+                    - Notification:
+                          NotificationType: ACTUAL
+                          ComparisonOperator: GREATER_THAN
+                          Threshold: 80
+                      Subscribers:
+                          - SubscriptionType: EMAIL
+                            Address: ${env:BUDGET_ALERT_EMAIL}

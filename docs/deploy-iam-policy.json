@@ -1,0 +1,95 @@
+{
+    "Comment": "osls deploy に必要な権限をまとめたデプロイ専用ポリシー（Q6 = B / NFR-S4 / SECURITY-06）。IAM Identity Center の権限セット portfolioDeploy にカスタマー管理ポリシーとして設定する想定。IAM と S3 と CloudFormation はこのプロジェクトのリソース名に限定し、それ以外のサービスはリソースをワイルドカードとする（ADR-012 に記録した SECURITY-06 の例外）。",
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "CloudFormationStacks",
+            "Effect": "Allow",
+            "Action": "cloudformation:*",
+            "Resource": [
+                "arn:aws:cloudformation:ap-northeast-1:492427341198:stack/hk-portfolio-*/*"
+            ]
+        },
+        {
+            "Sid": "CloudFormationGlobalReads",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:ValidateTemplate",
+                "cloudformation:ListStacks",
+                "cloudformation:GetTemplateSummary",
+                "cloudformation:DescribeStackDriftDetectionStatus"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DeployTargets",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:*",
+                "apigateway:*",
+                "cloudfront:*",
+                "logs:*",
+                "budgets:*",
+                "sts:GetCallerIdentity"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DeploymentBuckets",
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::hk-portfolio*",
+                "arn:aws:s3:::hk-portfolio*/*"
+            ]
+        },
+        {
+            "Sid": "ListAllBuckets",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListAllMyBuckets",
+                "s3:GetBucketLocation"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ManageStackRoles",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:GetRole",
+                "iam:GetRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:DeleteRolePolicy",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy",
+                "iam:ListRolePolicies",
+                "iam:ListAttachedRolePolicies",
+                "iam:TagRole",
+                "iam:UntagRole",
+                "iam:UpdateAssumeRolePolicy"
+            ],
+            "Resource": [
+                "arn:aws:iam::492427341198:role/hk-portfolio-*"
+            ]
+        },
+        {
+            "Sid": "PassRoleToLambdaOnly",
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "arn:aws:iam::492427341198:role/hk-portfolio-*",
+            "Condition": {
+                "StringEquals": {
+                    "iam:PassedToService": "lambda.amazonaws.com"
+                }
+            }
+        },
+        {
+            "Sid": "ServiceLinkedRoles",
+            "Effect": "Allow",
+            "Action": "iam:CreateServiceLinkedRole",
+            "Resource": "*"
+        }
+    ]
+}

@@ -42,18 +42,23 @@ AI との 1 対 1 の対話に置き換えている。
 ホストに PHP / Node を入れる必要はない。理由は ADR-007 を参照。
 
 ```bash
-# 依存解決（ホストに PHP が無くても実行できる）
+# 1. PHP 依存の解決（ホストに PHP / Composer が無くても実行できる）
+#    イメージはダイジェストで固定する（NFR-S5: latest を使わない）
 docker run --rm \
   -u "$(id -u):$(id -g)" \
-  -v "$(pwd):/var/www/html" \
-  -w /var/www/html \
-  laravelsail/php84-composer:latest \
-  composer install --ignore-platform-reqs
+  -e COMPOSER_HOME=/tmp/composer \
+  -v "$(pwd):/app" -w /app \
+  laravelsail/php84-composer@sha256:a2716e93e577c80bca7551126056446c1e06cb141af652ee6932537158108400 \
+  composer install
 
+# 2. 環境設定
 cp .env.example .env
+docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/app" -w /app \
+  laravelsail/php84-composer@sha256:a2716e93e577c80bca7551126056446c1e06cb141af652ee6932537158108400 \
+  php artisan key:generate
 
+# 3. 起動（初回はイメージのビルドに 10 分ほどかかる）
 ./vendor/bin/sail up -d
-./vendor/bin/sail artisan key:generate
 ./vendor/bin/sail npm install
 ./vendor/bin/sail npm run dev
 ```
@@ -64,14 +69,46 @@ http://localhost で表示される。停止は `./vendor/bin/sail down`。
 
 データベースを持たない（ADR-002）ため、Sail のサービスはアプリケーションコンテナのみ。
 
-## デプロイ
+### テスト
 
 ```bash
+./vendor/bin/sail exec laravel.test ./vendor/bin/pest
+```
+
+### 型チェック
+
+```bash
+./vendor/bin/sail npx tsc --noEmit
+```
+
+## デプロイ
+
+デプロイ前に AWS の認証情報を用意する（IAM Identity Center の一時認証情報を想定）。
+
+```bash
+export APP_KEY=...              # .env の値をそのまま使う
+export BUDGET_ALERT_EMAIL=...   # 予算アラートの通知先
+
+# 依存の脆弱性チェック（NFR-S5）
+./vendor/bin/sail exec laravel.test composer audit
+./vendor/bin/sail exec laravel.test npm audit --omit=dev
+
+# フロントエンドのビルド
 ./vendor/bin/sail npm run build
-osls deploy
+
+# 本番用に開発依存を除外してから固める
+./vendor/bin/sail exec laravel.test composer install --no-dev --optimize-autoloader
+
+npx osls deploy --stage prod
+
+# 開発依存を戻す
+./vendor/bin/sail exec laravel.test composer install
 ```
 
 Serverless Framework v4 ではなく `osls` を使う。理由は ADR-001 を参照。
+
+デプロイ内容の確認だけなら `npx osls print --stage prod`、
+生成される CloudFormation テンプレートの確認は `npx osls package --stage prod`。
 
 ## ドキュメント
 

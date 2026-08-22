@@ -418,3 +418,58 @@ Q4: "B
 **Context**: CONSTRUCTION フェーズ / UoW-1 / Code Generation Part 1 Step 5〜7
 
 ---
+
+## CONSTRUCTION / UoW-1: Code Generation Plan - Approval
+**Timestamp**: 2026-08-22T13:10:00Z
+**AI Prompt**: "Question 1 への回答と、計画全体の承認をお願いします"
+**User Response**: "回答しました
+承認しました"
+（uow-1-foundation-code-generation-plan.md Question 1 への記入）
+Q1: "A
+実行しました"
+**Status**: Approved
+**Context**: 計画を承認。Docker グループへの追加を実施済みとのこと。ただしグループはログイン時に確定するため現行シェルには未反映であることを確認し、`sg docker -c` 経由で実行可能であることを検証して回避（WSL 再起動は不要）
+
+---
+
+## CONSTRUCTION / UoW-1: Code Generation Part 2（生成）実施
+**Timestamp**: 2026-08-22T13:10:00Z〜
+**User Input**: N/A
+**AI Response**: Step 1〜12、14〜16 を実行（Step 13 のデプロイはユーザー実行のため未実施）。Laravel 13.26.1 を一時ディレクトリに生成し、保護対象（README.md / CLAUDE.md / docs / content / aidlc-docs / .aidlc-rule-details / .git）を除外してワークスペース直下へ配置。**既存 README.md の保持を実行前後で検証**。Sail 環境構築、Inertia + React + TypeScript + Tailwind、セキュリティヘッダ、相関 ID、例外ハンドラ、コントローラ、Pest テスト、serverless.yml を実装。検証結果: Pest 9 passed（48 assertions）、`tsc --noEmit` エラーなし、`npm run build` 成功、`composer audit` / `npm audit` 脆弱性なし、HTTP レスポンスでセキュリティヘッダ 5 件を実測確認、`osls print` / `osls package` で設定の妥当性を検証。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / Code Generation Part 2 Step 10〜13
+
+---
+
+## CONSTRUCTION / UoW-1: 実装で判明した設計との差異
+**Timestamp**: 2026-08-22T13:10:00Z〜
+**User Input**: N/A
+**AI Response**: 設計書の記述と実際が異なる箇所を 7 件検出し、implementation-summary.md §4 に記録。Δ-1: Inertia v3 の既定ページパスは `resources/js/pages`（小文字）。Δ-2: Bref 3 は `provided.al2023` のみ対応（`provided.al2` は osls が起動時に拒否）。Δ-3: Lift が公開する変数は `url` / `cname` / `assetsBucketName` で `domain` は存在しない。Δ-4: `bref/laravel-bridge` が `/tmp` 関連を自動設定するため `VIEW_COMPILED_PATH` の手動設定は不要（D-2 の答え）。Δ-5: 相関 ID は `X-Request-ID` ヘッダから取得するのが正しく、外部から送られうる値のため形式検証を追加。Δ-6: `X-Powered-By: PHP/8.4.24` が出ており SECURITY-09 に反するため除去しテストを追加。Δ-7: Laravel 13 スケルトンが外部フォント（bunny.net）を読み込む設定を含み、CSP `font-src 'self'` と SECURITY-13 に反するため除去。**D-1 を `osls package` で検証**: Lift の `extensions` は `DistributionConfig.Logging` を正しくマージし、`resources:` で定義したバケットへの `Fn::GetAtt` も最終テンプレートで解決される（CDK の警告は自身の synth 結果のみを検証した誤検知）。D-2・D-3 も確定。D-4・D-5 は実デプロイ時に確定。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / Code Generation Part 2
+
+---
+
+## SECURITY FINDING（対応済み）
+**Timestamp**: 2026-08-22T13:10:00Z
+**Rule**: SECURITY-09（Security Hardening and Misconfiguration Prevention）
+**Description**: 実装後の HTTP レスポンス実測で `X-Powered-By: PHP/8.4.24` を検出。PHP-FPM が `expose_php` により自動付与するもので、「フレームワーク・ランタイムのバージョンを利用者に見せない」という要件に反する。
+**Resolution**: `SecurityHeaders` ミドルウェアで Symfony のレスポンスヘッダと SAPI の両方から除去。Feature テストを追加して回帰を防止。
+**Status**: **解決済み**
+**Context**: CONSTRUCTION / UoW-1 / Code Generation
+
+---
+
+## CONSTRUCTION / UoW-1: 未解決の問題 P-1（報告のみ、未実装）
+**Timestamp**: 2026-08-22T13:10:00Z
+**User Input**: N/A
+**AI Response**: レスポンスに `Set-Cookie`（`XSRF-TOKEN` と `hk-portfolio-session`）が付いていることを実測で検出。U1-PF-4（HTML を CloudFront で 60 秒キャッシュ）と NFR-S9（キャッシュによる濫用対策）が機能しない可能性がある。原因は Laravel の `web` ミドルウェアグループが既定でセッションと CSRF を有効にしているため。本プロジェクトには認証もフォームも POST も無いためセッションは機能上不要。対応案 A（`web` グループからセッション・CSRF を外す）/ B（CloudFront 側でクッキーを無視）/ C（デプロイ後に実測して判断）を implementation-summary.md §6 に記載。**計画に含まれない変更のため実装せず、判断を仰ぐ**（計画書 §6「中断のルール」に従う）。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / Code Generation
+
+---
+
+## CONSTRUCTION / UoW-1: Code Generation 承認プロンプト提示
+**Timestamp**: 2026-08-22T13:10:00Z
+**User Input**: N/A（承認待ち）
+**AI Response**: 標準の 2 択完了メッセージを提示。次は Bolt B-2（ユーザーによるデプロイ）を挟み、UoW-2 の Functional Design へ。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / Code Generation Step 14〜15
+
+---

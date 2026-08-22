@@ -99,14 +99,24 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: INCEPTION
-- **Current Stage**: CONSTRUCTION - UoW-1 / Code Generation Part 1（計画）
-- **Next Stage**: UoW-1 の Code Generation Part 2（生成）
-- **Status**: 計画の承認待ち + 実行環境の判断待ち
+- **Current Stage**: CONSTRUCTION - UoW-1 / Code Generation Part 2（生成）完了
+- **Next Stage**: UoW-1 の Bolt B-2（デプロイ。ユーザー実行）→ UoW-2 の Functional Design
+- **Status**: 承認待ち
 
-## ⚠️ 実行環境の制約（未解決）
-私（Claude Code のシェル）は **Docker を実行できない**。`kusaba` が `docker` グループに所属しておらず、パスワード無しの `sudo` も不可。
-ホストに PHP・Composer が無いため代替手段もない。
-→ Code Generation Plan の Question 1 で解消方法を判断する
+## 実行環境
+Docker はグループ未所属で直接実行できないが、`sg docker -c '<コマンド>'` 経由で実行可能。**再ログイン不要**。
+（ユーザーが `usermod -aG docker` を実行済み。現行シェルには反映されないため sg を使う）
+
+## UoW-1 の実装状況
+- **B-1（ローカル起動）完了**。Laravel 13.26.1 / PHP 8.4.24 / Vite 8 / Inertia 3.3 / Pest 4 / Bref 3 / osls 4.1.0
+- テスト 9 件通過、型チェック通過、ビルド成功、脆弱性 0 件
+- `osls print` / `osls package` で `serverless.yml` の妥当性を検証済み
+- **B-2（デプロイ）未実施** — ユーザーの実行待ち
+
+## 未解決の問題
+- **P-1**: レスポンスに `Set-Cookie` が付き、CloudFront の HTML キャッシュ（U1-PF-4 / NFR-S9）が効かない可能性。認証もフォームも無いためセッション自体が不要。対応案 A/B/C を implementation-summary.md §6 に記載。**判断待ち**
+- **D-4**: デプロイ用 IAM ポリシー（実デプロイで確定）
+- **D-5**: `BUDGET_ALERT_EMAIL` の値
 
 ## 解決済みの論点
 - ~~**オリジン方式**~~ → Q1 = A（Lift + HTTP API を維持）。直アクセスは閉じない。K-1 として拡張ポイントに図示
