@@ -283,3 +283,55 @@ Q2: "A,B,C"
 **Context**: CONSTRUCTION / UoW-1 / NFR Requirements
 
 ---
+
+## CONSTRUCTION / UoW-1: NFR Requirements - Approval
+**Timestamp**: 2026-08-22T11:30:00Z
+**AI Prompt**: "Continue to Next Stage - Approve NFR requirements and proceed to NFR Design (uow-1-foundation)"
+**User Response**: "承認する、次へ！"
+**Status**: Approved
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Requirements 完了。NFR Design へ進む
+
+---
+
+## CONSTRUCTION / UoW-1: NFR Design 計画と質問の提示
+**Timestamp**: 2026-08-22T11:30:00Z
+**User Input**: N/A（承認済みにより自動進行）
+**AI Response**: `construction/nfr-design.md` をロードして実行。5 カテゴリの適用可否を評価し、Resilience Patterns は対象外と判定（外部依存・永続データ・状態が存在せず、リトライ/サーキットブレーカ/フェイルオーバの対象が無い。唯一の失敗経路は Application Design で設計済み）。残る 4 カテゴリから質問 5 問を作成し `aidlc-docs/construction/plans/uow-1-foundation-nfr-design-plan.md` に保存。**設計上の不確実性を明示**: Lift の `server-side-website` 構造がオリジンカスタムヘッダに対応しているか実装前の時点で確証がなく、非対応の場合は CloudFront Function 等の追加作業が必要になる旨を Question 1 に記載。併せて Secrets Manager（月 0.40 USD/シークレット）が NFR-1 と衝突するため SSM Parameter Store（無料）を前提とすることを明記。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Design Step 1〜4
+
+---
+
+## CONSTRUCTION / UoW-1: NFR Design 回答受領（Q1 に差し戻し）
+**Timestamp**: 2026-08-22T11:45:00Z
+**User Input**: "回答した"
+（uow-1-foundation-nfr-design-plan.md への記入内容 — 完全な生の回答）
+Q1: "X
+実装が楽な方に倒したい。
+ADR-012に引っ張られて難しいことをしようとしているように見えるので、それの履行を踏まえた検討案をいくつか出してください。"
+Q2: "B"
+Q3: "B"
+Q4: "A"
+Q5: "A"
+**AI Response**: Q1 の指摘を妥当と判断。経緯を再検証した結果、複雑化の起点は Q3 = B（ヘッダを CloudFront のみで付与）にあり、そこを変えればオリジン遮断自体が不要になることを確認。**SECURITY-04 の対象は「HTML を返すエンドポイント」であり静的アセットは対象外のため、Laravel ミドルウェアでヘッダを付与するだけで準拠する**という整理を明示。Q3-a の時点で「前提ごと選び直す」選択肢を提示すべきだった旨を計画書に記載。Question 1-a（方式の再選択。A: ミドルウェアのみ / B: ミドルウェア + Lift の標準機能 / C: ADR-012 維持）と Question 1-b（オリジン迂回の扱い）を追加。Q2〜Q5 は確定として受理（Q2 = B: HTML を 60 秒キャッシュ、Q3 = B: Inertia エラーページ、Q4 = A: 429 をそのまま返す、Q5 = A: Lambda リクエスト ID）。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Design Step 5（ユーザー指摘により Q1 を再提示）
+
+---
+
+## CONSTRUCTION / UoW-1: NFR Design 再質問の回答と成果物生成
+**Timestamp**: 2026-08-22T12:00:00Z
+**User Input**: "記入した！"
+（uow-1-foundation-nfr-design-plan.md Part 1.5 への記入内容 — 完全な生の回答）
+Q1-a: "A"
+Q1-b: "B"
+**AI Response**: セキュリティヘッダを Laravel ミドルウェアで付与し、オリジン遮断は行わない方式で確定。オリジン迂回は将来の課題として記録し、構成図の拡張ポイントに含める。**ADR-015 を追加し、ADR-012 の Status を「Superseded by ADR-015」に変更**（ADR ファイル冒頭の運用ルール「既存の ADR は書き換えず Superseded として残す」に従い、ADR-012 の本文は保持）。ADR-015 には判断が変わった経緯を記録: 「上乗せの要望（静的アセットにもヘッダを付けたい）を追った結果、要件そのもの（HTML を返す全経路へのヘッダ付与）に穴が空き、それを塞ぐために重い対策を導入していた」。`docs/requirements.md` の NFR-S8 を取り消しに更新。UoW-1 の nfr-requirements.md の U1-SE-1 を改訂、U1-SE-2 / U1-SE-3 を取り消し、SECURITY-04 の準拠根拠を更新。Application Design の `VerifyCloudFrontOrigin` を `SecurityHeaders` に戻し、ヘッダ値を `config/security.php` に外出しする設計に変更（テスト容易性のため）。NFR Design 成果物 2 点を生成: nfr-design-patterns.md（適用パターン 6 / 不採用パターン 11 とその理由 / 既知の未対応事項 3）、logical-components.md（論理コンポーネント 10、擬似コード、統合図、Infrastructure Design への設定値引き渡し）。Security Compliance: 準拠 9 / N/A 4 / 準拠（例外あり）1 / 部分的に適用外 1 / ブロッキング所見なし。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Design Step 6
+
+---
+
+## CONSTRUCTION / UoW-1: NFR Design 承認プロンプト提示
+**Timestamp**: 2026-08-22T12:00:00Z
+**User Input**: N/A（承認待ち）
+**AI Response**: 標準の 2 択完了メッセージを提示。次ステージは UoW-1 の Infrastructure Design。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Design Step 7〜8
+
+---

@@ -88,8 +88,8 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ### 🟢 CONSTRUCTION PHASE
 - [ ] Functional Design — EXECUTE（UoW-2 のみ）
-- [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認待ち
-- [ ] NFR Design — EXECUTE（UoW-1 のみ）
+- [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
+- [x] NFR Design — EXECUTE（UoW-1 のみ）※承認待ち
 - [ ] Infrastructure Design — EXECUTE（UoW-1 のみ）
 - [ ] Code Generation — EXECUTE（UoW-1〜4）
 - [ ] Build and Test — EXECUTE
@@ -99,14 +99,16 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: INCEPTION
-- **Current Stage**: CONSTRUCTION - UoW-1 / NFR Requirements Complete
-- **Next Stage**: UoW-1 の NFR Design
+- **Current Stage**: CONSTRUCTION - UoW-1 / NFR Design Complete
+- **Next Stage**: UoW-1 の Infrastructure Design
 - **Status**: 承認待ち
 
 ## UoW-1 で確定した主要決定
 - リージョン `ap-northeast-1` / Lambda メモリ 512 MB / 同時実行上限 10
 - CSP: `script-src 'self'` 厳格、`style-src` のみ `'unsafe-inline'`（ADR-011）
-- セキュリティヘッダは CloudFront で付与、オリジン直アクセスは共有シークレットで遮断（ADR-012）
+- セキュリティヘッダは Laravel ミドルウェアで付与（ADR-015。ADR-012 を Superseded）
+- HTML は 60 秒キャッシュ、静的アセットは 1 年。Invalidation は使わない
+- エラーページは Inertia、429 はそのまま返す、相関 ID は Lambda リクエスト ID
 - AWS WAF を使わず、キャッシュ + 同時実行上限 + 予算アラートで濫用対策（ADR-013）
 - JSON 構造化ログ、ログ保持は一律 14 日（ADR-014。SECURITY-14 のログ保持要件は適用外）
 - デプロイ IAM は専用ポリシー（リソースはワイルドカード。SECURITY-06 の例外として記録）

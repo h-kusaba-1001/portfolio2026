@@ -52,9 +52,9 @@ Vite のハッシュ付きファイル名との組み合わせで不整合が起
 
 | ID | 要件 | 対応する上位要件 |
 |---|---|---|
-| U1-SE-1 | セキュリティヘッダは **CloudFront の Response Headers Policy** で付与する | NFR-S1 / SECURITY-04（Q3 = B） |
-| U1-SE-2 | **CloudFront 経由でないリクエストを Lambda 側で 403 拒否する**。CloudFront がオリジンリクエストに付与する共有シークレットヘッダを検証する | NFR-S8 / SECURITY-04, 09（Q3-a = B） |
-| U1-SE-3 | 共有シークレットは環境変数（SSM Parameter Store 経由）で供給し、コードに含めない | SECURITY-12（ハードコード禁止） |
+| U1-SE-1 | セキュリティヘッダは **Laravel のミドルウェア `SecurityHeaders`** で付与する（ADR-015 により改訂。当初は CloudFront で付与する方針だった） | NFR-S1 / SECURITY-04 |
+| ~~U1-SE-2~~ | ~~CloudFront 経由でないリクエストを Lambda 側で 403 拒否する~~ → **取り消し**（ADR-015）。オリジン迂回は既知の未対応事項として構成図の拡張ポイントに記載する | — |
+| ~~U1-SE-3~~ | ~~共有シークレットの供給~~ → **取り消し**（U1-SE-2 の取り消しに伴う） | — |
 | U1-SE-4 | CSP は `script-src 'self'` を維持し、`style-src` にのみ `'unsafe-inline'` を許可する | NFR-S1 / SECURITY-04（Q2 = B、ADR-011） |
 | U1-SE-5 | HSTS は `max-age=31536000; includeSubDomains` とする | SECURITY-04 |
 | U1-SE-6 | S3 バケットはパブリックアクセスをブロックし、CloudFront から OAC 経由でのみ読ませる | NFR-S7 / SECURITY-01, 09 |
@@ -163,7 +163,7 @@ form-action 'none'
 | SECURITY-01 暗号化 | **準拠** | U1-SE-6, U1-SE-7（S3 の暗号化とパブリックアクセスブロック）。TLS は CloudFront が終端し、HTTP はリダイレクトする |
 | SECURITY-02 アクセスログ | **準拠** | U1-OB-5 |
 | SECURITY-03 アプリログ | **準拠** | U1-OB-1〜3 |
-| SECURITY-04 セキュリティヘッダ | **準拠** | U1-SE-1（CloudFront で付与）+ **U1-SE-2（オリジン直アクセスを遮断）**。この 2 点により、HTML を返す経路が CloudFront のみとなる。当初の Q3 = B 単独では非準拠だったが Q3-a = B で解消 |
+| SECURITY-04 セキュリティヘッダ | **準拠** | U1-SE-1（Laravel ミドルウェアで付与）。HTML を返す経路は必ず Lambda を通るため、直アクセスされる API Gateway の URL を含め全ての HTML レスポンスにヘッダが付く。静的アセットは HTML を返さないため SECURITY-04 の対象外（ADR-015） |
 | SECURITY-05 入力検証 | **N/A** | 受け付ける入力パラメータが存在しない |
 | SECURITY-06 最小権限 | **準拠（例外あり）** | U1-SE-8（実行ロールは最小）。U1-SE-9 のデプロイ用ポリシーはリソースをワイルドカードとする。CloudFormation が作成前のリソースを対象とするため、リソース単位の限定が原理的に困難。**この例外を ADR-012 に文書化する** |
 | SECURITY-07 ネットワーク | **N/A** | VPC を使用しない。セキュリティグループ・サブネット・NACL が存在しない |
