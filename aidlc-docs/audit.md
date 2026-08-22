@@ -335,3 +335,60 @@ Q1-b: "B"
 **Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Design Step 7〜8
 
 ---
+
+## CONSTRUCTION / UoW-1: ユーザーからの技術質問（オリジン遮断の可否）
+**Timestamp**: 2026-08-22T12:15:00Z
+**User Input**: "質問です
+もし、APIGWに直アクセスする方法を閉じ、CloudFrontに限定できればうれしいのですが、そういったことはできないですか？"
+**AI Response**: 現構成（API Gateway HTTP API）では、リソースポリシーも WAF も利用できないためネットワークレベルで閉じる手段が無いことを説明。閉じるには ① Lambda Function URL + CloudFront OAC ② REST API + リソースポリシー のいずれかでオリジン種別を変える必要があると回答。Lift の対応状況は未確認（K-3）であり、憶測で決めると ADR-012 の二の舞になるため、Infrastructure Design で事実確認したうえで判断することを提案。進め方 3 案（1: NFR Design を承認し Infrastructure Design の質問に含める / 2: Request Changes で差し戻し / 3: 現方針維持）を提示。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Design 承認前の技術確認
+
+---
+
+## CONSTRUCTION / UoW-1: NFR Design - Approval
+**Timestamp**: 2026-08-22T12:20:00Z
+**AI Prompt**: "Continue to Next Stage - Approve NFR design and proceed to Infrastructure Design (uow-1-foundation)"
+**User Response**: "OKです、1で進めてください
+承認しました"
+**Status**: Approved
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Design 完了。オリジン方式の論点は Infrastructure Design の質問に含める方針で合意
+
+---
+
+## CONSTRUCTION / UoW-1: Infrastructure Design 事前調査
+**Timestamp**: 2026-08-22T12:20:00Z
+**User Input**: N/A
+**AI Response**: K-3（Lift の設定可能範囲が未確認）を解消するため、一次情報を調査。確認できた事実 F-1〜F-8 を計画書に記載。主要な発見: (1) Lift `server-side-website` は API Gateway 前提で Function URL オリジンに非対応 (2) オリジンカスタムヘッダの設定オプションが無い → ADR-012 方式は `extensions.distribution` での配列上書きが必要で壊れやすい (3) **CloudFront アクセスログの設定オプションも無く、NFR-S2 / SECURITY-02 の実現に `extensions` が必要**（新たに判明した問題） (4) `apiGateway: "rest"` は選択可能で、Serverless Framework の `provider.apiGateway.resourcePolicy` により `aws:SourceIp` 制限が使える（HTTP API は不可） (5) CloudFront は Lambda Function URL に対する OAC をサポートし、`AuthType: AWS_IAM` との組み合わせで直アクセスを完全に遮断できる (6) Bref は `url: true` で Function URL に対応。出典: Lift 公式ドキュメント、AWS CloudFront 開発者ガイド、AWS What's New（2024年4月）、Serverless Framework ドキュメント、Bref ドキュメント。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / Infrastructure Design Step 1
+
+---
+
+## CONSTRUCTION / UoW-1: Infrastructure Design 計画と質問の提示
+**Timestamp**: 2026-08-22T12:20:00Z
+**User Input**: N/A
+**AI Response**: `aidlc-docs/construction/plans/uow-1-foundation-infrastructure-design-plan.md` を作成。7 カテゴリの適用可否を評価し、Messaging Infrastructure と Shared Infrastructure を対象外と判定（キュー・イベント駆動処理が存在しない / 単一アプリケーション・単一スタックで共有リソースが無い）。質問 4 問を作成: Q1 オリジン方式（A: 現状維持 / B: REST API + IP 制限 / C: Function URL + OAC。各案の代償を事実ベースで記載）、Q2 CloudFront アクセスログの実現方法（C を選ぶと SECURITY-02 非準拠になる旨を明記）、Q3 ステージ構成、Q4 AWS 認証情報の準備方法（CON-1 の解消）。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / Infrastructure Design Step 2〜4
+
+---
+
+## CONSTRUCTION / UoW-1: Infrastructure Design 回答受領と成果物生成
+**Timestamp**: 2026-08-22T12:40:00Z
+**User Input**: "記入しました！"
+（uow-1-foundation-infrastructure-design-plan.md への記入内容 — 完全な生の回答）
+Q1: "A"
+Q2: "A"
+Q3: "A"
+Q4: "B
+すでに用意済みなので、こちらでexportします"
+**AI Response**: 曖昧さ・矛盾なしと判定。**CON-1 が解消**（SSO の一時認証情報を利用、準備済み）。Q1 = A のため ADR-005 / ADR-015 の見直しは発生せず、`content/stack.md` と README の構成図も更新不要。Q2 = A の実装に関わる追加調査を実施し、**CloudFront の標準ログ（レガシー）は保存先 S3 バケットで ACL が有効である必要がある**ことを確認（2023 年 4 月以降、新規バケットは既定で ACL 無効のため、`ObjectOwnership: ObjectWriter` の明示が必要）。代替の標準ログ v2（CloudWatch Logs 配信機構、ACL 不要）は CFN リソースが 3 つ増え Lift との組み合わせの前例が少ないため不採用とし、再検討条件とともに設計書に記録。成果物 2 点を生成: infrastructure-design.md（論理→物理マッピング、AWS リソース 10 件、`serverless.yml` の具体案、IAM 設計、ACL 注意点、費用再検証、Security Compliance）、deployment-architecture.md（構成図、認証情報、デプロイ手順、検証項目 V-1〜V-10、ロールバック手順、未確定事項 D-1〜D-5）。Security Compliance: 準拠 9 / N/A 4 / 準拠（例外あり）1 / 部分的に適用外 1 / ブロッキング所見なし。K-1（オリジン迂回）は SECURITY-11 の非準拠には当たらないと判断（予約済み同時実行数が throttling の役割を果たすため）し、判断根拠を明記。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / Infrastructure Design Step 5〜6
+
+---
+
+## CONSTRUCTION / UoW-1: Infrastructure Design 承認プロンプト提示
+**Timestamp**: 2026-08-22T12:40:00Z
+**User Input**: N/A（承認待ち）
+**AI Response**: 標準の 2 択完了メッセージを提示。次ステージは UoW-1 の Code Generation。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / Infrastructure Design Step 7〜8
+
+---

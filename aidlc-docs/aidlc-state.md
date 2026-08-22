@@ -89,8 +89,8 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 ### 🟢 CONSTRUCTION PHASE
 - [ ] Functional Design — EXECUTE（UoW-2 のみ）
 - [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
-- [x] NFR Design — EXECUTE（UoW-1 のみ）※承認待ち
-- [ ] Infrastructure Design — EXECUTE（UoW-1 のみ）
+- [x] NFR Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
+- [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認待ち
 - [ ] Code Generation — EXECUTE（UoW-1〜4）
 - [ ] Build and Test — EXECUTE
 
@@ -99,9 +99,27 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: INCEPTION
-- **Current Stage**: CONSTRUCTION - UoW-1 / NFR Design Complete
-- **Next Stage**: UoW-1 の Infrastructure Design
+- **Current Stage**: CONSTRUCTION - UoW-1 / Infrastructure Design Complete
+- **Next Stage**: UoW-1 の Code Generation
 - **Status**: 承認待ち
+
+## 解決済みの論点
+- ~~**オリジン方式**~~ → Q1 = A（Lift + HTTP API を維持）。直アクセスは閉じない。K-1 として拡張ポイントに図示
+- ~~**CON-1**~~ → **解消**。IAM Identity Center（SSO）の一時認証情報を利用。準備済み
+
+## Infrastructure Design で確定した内容
+- AWS リソース 10 件（Lambda / 実行ロール / ロググループ×2 / HTTP API / CloudFront / S3×2 / Budgets / CFN スタック）
+- ステージは `prod` のみ、スタック名 `hk-portfolio-prod`
+- CloudFront アクセスログは `extensions.distribution` で追加。**ログ用 S3 は `ObjectOwnership: ObjectWriter` が必須**（レガシー標準ログの ACL 要件）
+- Lambda 実行ロールは CloudWatch Logs の書き込みのみ（削除権限なし）
+- 費用見込み: 月 10 円前後
+
+## Code Generation への引き渡し事項（未確定）
+- D-1: Lift の `extensions` のマージ挙動（実機確認）
+- D-2: `bref/laravel-bridge` の `/tmp` 自動処理範囲
+- D-3: 本番デプロイ時の開発用依存の除外手順
+- D-4: デプロイ用 IAM ポリシーの最終内容
+- D-5: 予算アラートの通知先メールアドレス
 
 ## UoW-1 で確定した主要決定
 - リージョン `ap-northeast-1` / Lambda メモリ 512 MB / 同時実行上限 10
