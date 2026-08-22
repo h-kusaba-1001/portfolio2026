@@ -21,7 +21,7 @@ Inertia の props として返している。
 | デプロイ | [osls](https://github.com/oss-serverless/osls)（Serverless Framework v3 の OSS フォーク） |
 | ランタイム | [Bref](https://bref.sh/) 3.0 + AWS Lambda |
 | アプリ | Laravel + Inertia.js |
-| フロント | React + Tailwind CSS |
+| フロント | React + TypeScript + Tailwind CSS |
 | 配信 | Lift `server-side-website`（CloudFront + S3） |
 | データ | Markdown（`league/commonmark`） |
 | 開発環境 | Laravel Sail（Docker） |

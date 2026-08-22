@@ -152,3 +152,30 @@ Q8: "B"
 **Context**: INCEPTION フェーズ / Application Design Step 7〜9
 
 ---
+
+## Application Design: 追加質問の回答受領と成果物生成
+**Timestamp**: 2026-08-22T10:05:00Z
+**User Input**: "回答しました"
+（application-design-plan.md Part 1.5 への記入内容 — 完全な生の回答）
+Q5-a: "B"
+Q6-a: "A"
+**AI Response**: 曖昧さの解消を確認（層の深さ = 軽量 3 層 + ポート、失敗時 = セクション枠を残し固定文言を表示）。設計成果物 5 点を生成: components.md（クラス 12 + React コンポーネント 15）、component-methods.md（全メソッドシグネチャ）、services.md（ユースケース 1 つ、通常系/異常系のシーケンス、DI 定義）、component-dependency.md（依存マトリクス、通信パターン、データフロー、結合点の危険度）、application-design.md（統合）。Mermaid 図は全てノード ID を英数字のみとし、テキスト代替を併記（content-validation.md 準拠）。Security Compliance を評価: 準拠 7（SECURITY-03, 04, 05, 09, 11, 13, 15）/ N/A 8 / ブロッキング所見なし。設計上の弱点 4 件を明示（最重要: H2 見出しの文字列一致依存）。TypeScript / JavaScript の選択を質問し損ねたため、未確定事項として承認時に確認する形で明記。
+**Context**: INCEPTION フェーズ / Application Design Step 10
+
+---
+
+## Application Design: 承認プロンプト提示
+**Timestamp**: 2026-08-22T10:05:00Z
+**User Input**: N/A（承認待ち）
+**AI Response**: Application Design 完了メッセージを提示。Units Generation は SKIP のため「Add Units Generation」オプションを併記。次ステージは CONSTRUCTION PHASE / UoW-1 の NFR Requirements。
+**Context**: INCEPTION フェーズ / Application Design Step 11〜12
+
+---
+
+## Application Design: 未確定事項の解決（TypeScript）
+**Timestamp**: 2026-08-22T10:15:00Z
+**User Input**: "TSでいいよ"
+**AI Response**: フロントエンドの言語を TypeScript で確定。ADR-006 のタイトルを「フロントエンドに React + TypeScript を採用する」に改訂し、選定理由（props の形の不一致をビルドで検出）と限界（H2 見出しの文字列一致は型で検証できない）を追記。`docs/requirements.md` と `README.md` の技術構成表、`components.md`、`application-design.md` §7、`aidlc-state.md` の Open Items を更新。ファイル拡張子と型の置き場所（`resources/js/types/`）の方針も明記。
+**Context**: INCEPTION フェーズ / Application Design 未確定事項の解決。ステージの明示承認は未取得のため、承認プロンプトを再提示する
+
+---

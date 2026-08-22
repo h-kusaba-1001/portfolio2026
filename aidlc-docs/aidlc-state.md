@@ -72,8 +72,8 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [x] Reverse Engineering — SKIPPED（greenfield のため）
 - [x] Requirements Analysis — 承認済み（2026-08-22）
 - [x] User Stories — SKIP（US-1〜7 が既存）
-- [x] Workflow Planning — 承認待ち
-- [ ] Application Design — EXECUTE
+- [x] Workflow Planning — 承認済み（2026-08-22）
+- [x] Application Design — 承認待ち
 - [ ] Units Generation — SKIP（UoW-1〜4 が既存）
 
 ### 🟢 CONSTRUCTION PHASE
@@ -89,6 +89,18 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: INCEPTION
-- **Current Stage**: Workflow Planning Complete
-- **Next Stage**: Application Design
+- **Current Stage**: Application Design Complete
+- **Next Stage**: CONSTRUCTION PHASE / UoW-1 の NFR Requirements（Units Generation は SKIP）
 - **Status**: 承認待ち
+
+## Application Design で確定した設計判断
+- レイヤ: Domain / Application / Infrastructure / Http（軽量 3 層 + ポート）
+- ユースケースは `GetPortfolioContent` の 1 つのみ
+- 構成図ノードと `stack.md` の H2 見出しを文字列一致で対応付ける（要検証テスト）
+- キャッシュは Repository のデコレータとして分離
+- 読み込み失敗はセクション枠を残し固定文言を表示、ページ全体は生存
+- 構成図 SVG のノード座標はコンポーネントに直書き
+- Hero の文言と GitHub リンクはコンポーネントに直接記述
+
+## Open Items
+- なし（フロントエンドの言語は TypeScript で確定。ADR-006 に追記済み）

@@ -246,18 +246,25 @@ X) Other (please describe after [Answer]: tag below)
 
 回答を受け取り、曖昧さがないか検証したうえで以下を生成します。
 
-- [ ] 回答の分析（曖昧・矛盾・複数選択肢の混在がないか検証。あれば追加質問）
-- [ ] `aidlc-docs/inception/application-design/components.md` を生成
+- [x] 回答の分析（曖昧・矛盾・複数選択肢の混在がないか検証。あれば追加質問）
+      → 2 件検出し Question 5-a / 6-a を追加。回答受領（5-a = B、6-a = A）で解消
+- [x] `aidlc-docs/inception/application-design/components.md` を生成
       （コンポーネント名、目的、責務、インターフェース）
-- [ ] `aidlc-docs/inception/application-design/component-methods.md` を生成
+- [x] `aidlc-docs/inception/application-design/component-methods.md` を生成
       （メソッドシグネチャ、目的、入出力型。詳細なビジネスルールは Functional Design で扱う）
-- [ ] `aidlc-docs/inception/application-design/services.md` を生成
+- [x] `aidlc-docs/inception/application-design/services.md` を生成
       （サービス定義、責務、オーケストレーション）
-- [ ] `aidlc-docs/inception/application-design/component-dependency.md` を生成
+- [x] `aidlc-docs/inception/application-design/component-dependency.md` を生成
       （依存マトリクス、通信パターン、データフロー図）
-- [ ] `aidlc-docs/inception/application-design/application-design.md` を生成
+- [x] `aidlc-docs/inception/application-design/application-design.md` を生成
       （上記を統合した 1 枚のドキュメント）
-- [ ] 設計の完全性と一貫性を検証
-- [ ] Security Compliance（SECURITY-11「セキュア設計」ほか該当ルール）を評価
-- [ ] `aidlc-docs/aidlc-state.md` を更新
-- [ ] `aidlc-docs/audit.md` に記録
+- [x] 設計の完全性と一貫性を検証
+      → US-1〜7・UoW-1〜4 との対応を確認。弱点 4 件を application-design.md §5 に明示
+- [x] Security Compliance（SECURITY-11「セキュア設計」ほか該当ルール）を評価
+      → 準拠 7 / N/A 8 / ブロッキング所見なし
+- [x] `aidlc-docs/aidlc-state.md` を更新
+- [x] `aidlc-docs/audit.md` に記録
+
+## 未確定事項
+
+- [x] フロントエンドの言語 → **TypeScript** で確定（2026-08-22）。ADR-006 に追記

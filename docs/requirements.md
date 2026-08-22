@@ -54,7 +54,7 @@ AI-DLC の Security ベースライン拡張を有効にしたことによる要
 | デプロイ | osls | ADR-001 |
 | ランタイム | Bref 3.0 + AWS Lambda（PHP 8.4） | ADR-007 |
 | アプリ | Laravel + Inertia.js | ADR-004 |
-| フロント | React + Tailwind CSS（CSR。SSR なし） | ADR-006, ADR-008 |
+| フロント | React + TypeScript + Tailwind CSS（CSR。SSR なし） | ADR-006, ADR-008 |
 | 配信 | Lift `server-side-website` | ADR-005 |
 | データ | Markdown（`league/commonmark`） | ADR-002, ADR-003 |
 | 開発環境 | Laravel Sail（Docker、PHP 8.4） | ADR-007 |

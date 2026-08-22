@@ -109,12 +109,20 @@ Lift・Bref・osls はいずれも Matthieu Napoli 氏によるもの。
 
 ---
 
-## ADR-006: フロントエンドに React を採用する
+## ADR-006: フロントエンドに React + TypeScript を採用する
 
 **Status**: Accepted
 
 **決定**
-Inertia のフロントエンドに Vue ではなく React を使う。
+Inertia のフロントエンドに Vue ではなく React を使う。言語は TypeScript とする。
+
+**TypeScript を選ぶ理由**
+サーバが返す props の形（`sections[].blocks[].heading` / `html`）と、
+構成図ノードの定義（`DiagramNodeDef`）が対応している。型があれば、
+サーバ側の変換を変えてフロント側を直し忘れた場合にビルドで落ちる。
+
+ただし、構成図ノードの `heading` が `content/stack.md` の H2 見出しと
+一致するかどうかは型では検証できない。ここはテストで担保する。
 
 **トレードオフ**
 Vue.js 2 の方が習熟度は高い。Inertia の抽象度が高く両者の差異が小さいため許容する。
