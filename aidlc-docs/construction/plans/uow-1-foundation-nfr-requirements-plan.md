@@ -166,6 +166,59 @@ X) Other (please describe after [Answer]: tag below)
 
 ---
 
+## Part 1.5: 追加質問（回答の分析で検出した問題）
+
+回答は概ね明確でした。Q8 の「A と C」は併用可能な組み合わせとして受理します。
+ただし **Q3 = B にはセキュリティルール上の穴があり、このままでは
+SECURITY-04 の非準拠（ブロッキング所見）になります。**
+
+---
+
+## Question 3-a（Q3 のフォローアップ）— ブロッキング所見の解消
+
+**検出した問題**
+
+Q3 = B（CloudFront の Response Headers Policy のみ）を選ぶと、
+**API Gateway のエンドポイント URL に直接アクセスした場合、セキュリティヘッダの無い HTML が返ります。**
+
+Lift の `server-side-website` 構成では、API Gateway の URL（`https://xxxx.execute-api.
+ap-northeast-1.amazonaws.com/`）も外部から到達可能な状態で作られます。
+CloudFront を経由しないため、Response Headers Policy が適用されません。
+
+SECURITY-04 は「**HTML を返す全てのエンドポイント**にヘッダを設定すること」と定めています。
+直アクセス可能な API Gateway エンドポイントはこれに該当するため、
+現状のままでは **ブロッキング所見**となり、次ステージに進めません。
+
+副次的な問題として、CloudFront のみで付与する場合、
+**ローカル開発と Feature テストではヘッダを検証できません**
+（`aidlc-docs/inception/requirements/requirements.md` §6 では
+NFR-S1 の検証方法を「レスポンスヘッダの Feature テスト」としていました）。
+
+**選択肢**
+
+A) **Laravel のミドルウェアでも付与する**（実質 Q3 = C に変更）
+   - どの経路でもヘッダが欠落しない
+   - ローカルと Feature テストで検証できる
+   - CloudFront 側と 2 箇所で管理することになる（値がずれるリスク）
+
+B) **CloudFront のみを維持し、API Gateway への直アクセスを遮断する**
+   - CloudFront が付与する共有シークレットヘッダを Lambda 側で検証し、
+     一致しないリクエストを 403 で拒否するミドルウェアを追加する
+   - HTML を返す経路が CloudFront だけになり、SECURITY-04 に準拠する
+   - オリジン迂回そのものを塞げる（より根本的な対策）
+   - Feature テストではヘッダそのものではなく「遮断が効くこと」を検証する形になる
+
+C) **CloudFront のみを維持し、直アクセスは許容する**
+   - SECURITY-04 の例外として ADR に正当化を記録する
+   - **注記**: 拡張ルール上、例外の文書化で回避できる性質のものではないため、
+     この選択は Security 拡張の一部無効化に相当します
+
+X) Other (please describe after [Answer]: tag below)
+
+[Answer]:B
+
+---
+
 ## Part 2: 実行ステップ（回答後に実施）
 
 - [ ] 回答の分析（曖昧・矛盾がないか検証。あれば追加質問）

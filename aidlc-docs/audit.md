@@ -196,3 +196,30 @@ Q6-a: "A"
 **Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Requirements Step 1〜4
 
 ---
+
+## CONSTRUCTION / UoW-1: NFR Requirements 回答受領と分析
+**Timestamp**: 2026-08-22T10:35:00Z
+**User Input**: "回答した！"
+（uow-1-foundation-nfr-requirements-plan.md への記入内容 — 完全な生の回答）
+Q1: "A"
+Q2: "B"
+Q3: "B"
+Q4: "A"
+Q5: "A"
+Q6: "B"
+Q7: "A"
+Q8: "AとC"
+**AI Response**: Step 5 の必須分析を実施。Q8「AとC」は質問文で併用可能と明示した組み合わせのため曖昧さなしと判定。**Q3 = B にセキュリティ非準拠を検出**: CloudFront の Response Headers Policy のみでヘッダを付与すると、Lift `server-side-website` が作成する API Gateway エンドポイントへの直アクセス時にヘッダ無しの HTML が返る。SECURITY-04「HTML を返す全てのエンドポイントにヘッダを設定すること」に非準拠となり、拡張ルール上のブロッキング所見に該当する。副次問題としてローカル開発と Feature テストでヘッダを検証できず、requirements.md §6 の NFR-S1 検証方法とも矛盾する。Question 3-a を追加し、解消方法（A: ミドルウェア併用 / B: CloudFront 経由でないリクエストを Lambda 側で遮断 / C: 例外として許容＝Security 拡張の一部無効化に相当）を提示。回答待ち。
+**Context**: CONSTRUCTION フェーズ / UoW-1 / NFR Requirements Step 5（ブロッキング所見により Step 6 に進めず）
+
+---
+
+## SECURITY FINDING（未解決）
+**Timestamp**: 2026-08-22T10:35:00Z
+**Rule**: SECURITY-04（HTTP Security Headers for Web Applications）
+**Description**: Q3 = B（CloudFront の Response Headers Policy のみ）の選択により、API Gateway エンドポイントへの直アクセス時に CSP・HSTS・X-Content-Type-Options・X-Frame-Options・Referrer-Policy が付与されない HTML レスポンスが返る経路が残る。
+**Stage Context**: CONSTRUCTION / UoW-1 / NFR Requirements
+**Status**: 未解決。Question 3-a の回答待ち。解消するまで「Continue to Next Stage」を提示しない
+**Context**: Blocking security finding
+
+---
