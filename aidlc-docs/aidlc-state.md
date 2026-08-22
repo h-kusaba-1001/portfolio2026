@@ -87,7 +87,7 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [ ] Units Generation — SKIP（UoW-1〜4 が既存）
 
 ### 🟢 CONSTRUCTION PHASE
-- [x] Functional Design — EXECUTE（UoW-2 のみ）※承認待ち
+- [x] Functional Design — EXECUTE（UoW-2 のみ）※承認済み（2026-08-22）
 - [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] NFR Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
@@ -99,9 +99,9 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: UoW-2 / Functional Design 完了
-- **Next Stage**: UoW-2 の Code Generation
-- **Status**: 承認待ち
+- **Current Stage**: UoW-2 / Code Generation Part 1（計画）
+- **Next Stage**: UoW-2 の Code Generation Part 2（生成）
+- **Status**: 計画の承認待ち
 
 ## 🌐 公開 URL
 **https://d3bttkxchvfb66.cloudfront.net**（スタック `hk-portfolio-prod` / `ap-northeast-1`）
@@ -158,7 +158,7 @@ Docker はグループ未所属で直接実行できないが、`sg docker -c '<
 | Unit | ディレクトリ | 状態 |
 |---|---|---|
 | UoW-1 基盤構築 | `aidlc-docs/construction/uow-1-foundation/` | **完了・承認済み（2026-08-22 デプロイ済み）** |
-| UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | Functional Design 完了（承認待ち） |
+| UoW-2 コンテンツ基盤 | `aidlc-docs/construction/uow-2-content/` | Functional Design 承認済み / Code Generation 計画中 |
 | UoW-3 静的セクション | `aidlc-docs/construction/uow-3-sections/` | 未着手 |
 | UoW-4 構成図 | `aidlc-docs/construction/uow-4-diagram/` | 未着手 |
 

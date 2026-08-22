@@ -558,3 +558,20 @@ Security Compliance: 準拠 5（SECURITY-05, 09, 11, 13, 15）/ N/A 10 / ブロ�
 **Context**: CONSTRUCTION フェーズ / UoW-2 / Functional Design Step 7〜8
 
 ---
+
+## CONSTRUCTION / UoW-2: Functional Design - Approval
+**Timestamp**: 2026-08-22T15:15:00Z
+**AI Prompt**: "Continue to Next Stage - Approve functional design and proceed to Code Generation (uow-2-content)"
+**User Response**: "✅ Continue to Next Stage"
+**Status**: Approved
+**Context**: CONSTRUCTION フェーズ / UoW-2 / Functional Design 完了。Code Generation へ進む
+
+---
+
+## CONSTRUCTION / UoW-2: Code Generation Part 1（計画）
+**Timestamp**: 2026-08-22T15:15:00Z
+**User Input**: N/A（承認済みにより自動進行）
+**AI Response**: `aidlc-docs/construction/plans/uow-2-content-code-generation-plan.md` を作成（Step 1〜12、チェックボックス付き）。Functional Design の規則番号 R-1〜R-7 とテスト番号 T-1〜T-10 を、そのまま実装とテストに対応させる方針を明記。正規化規則の実装先として `app/Domain/Content/HeadingKey.php` を独立させ、「フロントと対になる箇所」であることを Step 2-8 に明示。**意図的にやらないこと**（セクションの体裁 = UoW-3 / 構成図の照合 = UoW-4 / `MarkdownBlock` 等のコンポーネント = UoW-3 / DB とマイグレーション = ADR-002）を表で明記し、ユニット境界を越えないようにした。Step 12（デプロイ）は任意とし、承認時に判断する形にした。
+**Context**: CONSTRUCTION フェーズ / UoW-2 / Code Generation Part 1 Step 1〜4
+
+---
