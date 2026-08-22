@@ -90,8 +90,8 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [ ] Functional Design — EXECUTE（UoW-2 のみ）
 - [x] NFR Requirements — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] NFR Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
-- [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認待ち
-- [ ] Code Generation — EXECUTE（UoW-1〜4）
+- [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
+- [ ] Code Generation — EXECUTE（UoW-1〜4）※UoW-1 の Part 1（計画）で承認待ち
 - [ ] Build and Test — EXECUTE
 
 ### 🟡 OPERATIONS PHASE
@@ -99,9 +99,14 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 
 ## Current Status
 - **Lifecycle Phase**: INCEPTION
-- **Current Stage**: CONSTRUCTION - UoW-1 / Infrastructure Design Complete
-- **Next Stage**: UoW-1 の Code Generation
-- **Status**: 承認待ち
+- **Current Stage**: CONSTRUCTION - UoW-1 / Code Generation Part 1（計画）
+- **Next Stage**: UoW-1 の Code Generation Part 2（生成）
+- **Status**: 計画の承認待ち + 実行環境の判断待ち
+
+## ⚠️ 実行環境の制約（未解決）
+私（Claude Code のシェル）は **Docker を実行できない**。`kusaba` が `docker` グループに所属しておらず、パスワード無しの `sudo` も不可。
+ホストに PHP・Composer が無いため代替手段もない。
+→ Code Generation Plan の Question 1 で解消方法を判断する
 
 ## 解決済みの論点
 - ~~**オリジン方式**~~ → Q1 = A（Lift + HTTP API を維持）。直アクセスは閉じない。K-1 として拡張ポイントに図示
