@@ -17,13 +17,13 @@ export default function Hero() {
             </p>
 
             <h1 className="mt-7 text-[2.125rem] leading-[1.12] font-semibold tracking-[-0.03em] sm:text-[3.5rem]">
-                月額 <span className="tnum">100</span> 円未満で動く、
+                AI-DLCとAWSでつくる
                 <br className="hidden sm:block" />
                 サーバレスなポートフォリオ
             </h1>
 
             <p className="mt-7 max-w-xl text-[1.0625rem] leading-[1.85] text-[color:var(--fg-muted)]">
-                データベースを持たず、固定費を限りなくゼロに近づけた構成で動いています。
+                サーバレスで、月々のインフラ費用が限りなくゼロになるよう目指しました。
                 <strong className="font-medium text-[color:var(--fg)]">
                     何をどう選んだのか
                 </strong>

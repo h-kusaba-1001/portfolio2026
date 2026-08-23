@@ -23,7 +23,7 @@ export default function NodePanel({
                 className="rounded-xl border border-dashed border-[color:var(--border)] px-5 py-6 text-sm text-[color:var(--fg-faint)]"
                 data-testid="node-panel-empty"
             >
-                図の要素を選ぶと、なぜそれを選んだのかが出ます。
+                アイコンを選ぶと、詳細の説明文が表示されます。
             </div>
         );
     }

@@ -18,9 +18,7 @@ export default function Career({ section }: { section: SectionProps }) {
         return (
             <section className="max-w-3xl" id="career" data-testid="section-career">
                 <SectionLead eyebrow="キャリアの変遷">
-                    銀行の営業から、
-                    <br />
-                    サーバレスを設計する側へ。
+                    これまでの転職理由と経験です。
                 </SectionLead>
                 <div className="mt-8">
                     <ContentUnavailable sectionId={section.id} />
@@ -34,9 +32,7 @@ export default function Career({ section }: { section: SectionProps }) {
     return (
         <section className="max-w-3xl" id="career" data-testid="section-career">
             <SectionLead eyebrow="キャリアの変遷">
-                銀行の営業から、
-                <br />
-                サーバレスを設計する側へ。
+                これまでの転職理由と経験です。
             </SectionLead>
 
             {section.lead !== '' && (

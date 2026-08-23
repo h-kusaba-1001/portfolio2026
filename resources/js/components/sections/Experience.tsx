@@ -10,10 +10,9 @@ import type { SectionProps } from '@/types';
 export default function Experience({ section }: { section: SectionProps }) {
     return (
         <section className="max-w-3xl scroll-mt-24" id="experience" data-testid="section-experience">
-            <SectionLead eyebrow="やってきたこと">
-                要件定義から本番運用まで、
+            <SectionLead eyebrow="これまでの経験">
+                顧客折衝と技術力が強みです。
                 <br />
-                一通り自分で回してきました。
             </SectionLead>
 
             <div className="mt-8 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] px-6 py-6">

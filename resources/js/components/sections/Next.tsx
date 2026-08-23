@@ -14,9 +14,9 @@ export default function Next({ section }: { section: SectionProps }) {
             <div className="grid gap-8 sm:grid-cols-5">
                 <div className="sm:col-span-2">
                     <SectionLead eyebrow="これから">
-                        ユーザと直接向き合う開発に、
+                        自身の強みを活かし、
                         <br />
-                        軸足を置きたい。
+                        ユーザと向き合う。
                     </SectionLead>
 
                     <div className="mt-6">
