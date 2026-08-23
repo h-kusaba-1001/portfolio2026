@@ -15,6 +15,7 @@
         "league/commonmark": "^2.10"
     },
     "require-dev": {
+        "cyclonedx/cyclonedx-php-composer": "^6.2",
         "fakerphp/faker": "^1.23",
         "laravel/boost": "^2.5",
         "laravel/pail": "^1.2.5",
@@ -86,7 +87,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "cyclonedx/cyclonedx-php-composer": true
         }
     },
     "minimum-stability": "stable",

@@ -38,6 +38,7 @@
     --diagram-node: #f0fdf4;
     --diagram-node-quiet: #f8fafc;
     --diagram-border: #cbd5e1;
+    --diagram-arrow: #94a3b8;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -67,6 +68,7 @@
     --diagram-node: #132a24;
     --diagram-node-quiet: #111a2e;
     --diagram-border: #334155;
+    --diagram-arrow: #64748b;
 }
 
 body {
@@ -79,9 +81,17 @@ body {
   @tailwindcss/typography は導入しない（必要な要素が限られており、
   依存を増やす理由がないため。ADR-004 の判断基準）。
 */
+/* 本文は 16px / 行間 1.9。技術ブログ相当の読みやすさを基準にする */
 .prose-basic {
     color: var(--fg-muted);
+    font-size: 1rem;
     line-height: 1.9;
+}
+
+@media (min-width: 640px) {
+    .prose-basic {
+        font-size: 1.0625rem;
+    }
 }
 
 .prose-basic > * + * {
@@ -143,8 +153,9 @@ body {
 
 .prose-basic h3 {
     color: var(--fg);
-    font-weight: 600;
-    margin-top: 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-top: 1.75rem;
 }
 
 /*

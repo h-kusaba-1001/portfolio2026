@@ -92,16 +92,20 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [x] NFR Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] Code Generation — EXECUTE（UoW-1〜4）※**全ユニット完了・デプロイ済み**（UoW-3・UoW-4 は承認待ち）
-- [ ] Build and Test — EXECUTE
+- [x] Build and Test — EXECUTE ※承認待ち
 
 ### 🟡 OPERATIONS PHASE
 - [ ] Operations（プレースホルダ）
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: **UoW-1〜4 すべて完了・デプロイ済み**
-- **Next Stage**: Build and Test（最終確認）
-- **Status**: UoW-3・UoW-4 の承認待ち
+- **Current Stage**: **Build and Test 完了**
+- **Next Stage**: Operations（プレースホルダ）
+- **Status**: 承認待ち
+
+### 最終結果
+- ビルド成功 / **テスト 30 passed（168 assertions）** / 脆弱性 0 件
+- **完了条件のうち 2 つが「目視確認待ち」**（backlog B-4）。ADR-009 でブラウザテストを書かない方針にしたため、機械では埋められない
 
 ## 📋 残課題は `docs/backlog.md` に集約
 P-2（キャッシュ）/ S-1（SBOM 未実施）/ V-7（ログ形式）/ I-1（ビルド・デプロイ時間）/ C-1（AI-DLC をサイトに書く）ほか。**未解決事項はこのファイルを見れば分かる。**

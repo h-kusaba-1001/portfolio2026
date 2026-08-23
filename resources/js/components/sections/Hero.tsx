@@ -27,7 +27,7 @@ export default function Hero() {
                 <strong className="font-medium text-[color:var(--fg)]">
                     何を選び、何を選ばなかったのか
                 </strong>
-                を、判断の経緯ごと公開しています。
+                を、理由つきで載せています。
             </p>
 
             <div className="mt-8">

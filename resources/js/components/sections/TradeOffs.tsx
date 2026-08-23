@@ -6,13 +6,14 @@ type Choice = {
 };
 
 /**
- * 「選ばなかったもの」（docs/requirements.md S-2 の核 / D-3）。
+ * 「選ばなかったもの」（docs/requirements.md S-2 の核）。
  *
  * §1 のゴール「技術力の証明を『作れる』ではなく『選べる』に置く」に直結する。
- * 文章で並べると読み飛ばされるため、カードにして一覧性を上げる（D-2）。
+ * 見せ方は箇条書き + ネストした理由。カードにすると視線が散り、
+ * 「一覧をざっと読む」という本来の読まれ方に合わないため。
  *
- * 内容は ADR に基づく。Markdown 化していないのは、
- * これが「編集者の主張」であって差し替え対象のコンテンツではないため。
+ * 内容は編集者の主張であり差し替え対象のコンテンツではないため、
+ * Markdown 化せずここに持つ。
  */
 const REJECTED: Choice[] = [
     { name: 'RDS', reason: '最小構成でも月 2,000 円超。読み取りしかないので不要' },
@@ -25,40 +26,30 @@ const REJECTED: Choice[] = [
 
 export default function TradeOffs() {
     return (
-        <section id="tradeoffs" className="scroll-mt-20" data-testid="section-tradeoffs">
+        <section className="max-w-3xl scroll-mt-24" id="tradeoffs" data-testid="section-tradeoffs">
             <SectionLead eyebrow="選ばなかったもの">
                 何を使ったかより、
                 <br />
                 何を使わなかったかで決まりました。
             </SectionLead>
 
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2" data-testid="rejected-list">
+            <ul className="prose-basic mt-8" data-testid="rejected-list">
                 {REJECTED.map((choice) => (
-                    <li
-                        key={choice.name}
-                        className="rounded-xl border border-[color:var(--border)] px-5 py-4"
-                    >
-                        <p className="font-medium text-[color:var(--fg)] line-through decoration-[color:var(--fg-faint)] decoration-1">
-                            {choice.name}
-                        </p>
-                        <p className="mt-2 text-sm leading-relaxed text-[color:var(--fg-muted)]">
-                            {choice.reason}
-                        </p>
+                    <li key={choice.name}>
+                        <span className="font-semibold text-[color:var(--fg)]">{choice.name}</span>
+                        <ul className="mt-1">
+                            <li className="text-[color:var(--fg-muted)]">{choice.reason}</li>
+                        </ul>
                     </li>
                 ))}
             </ul>
 
-            <p className="mt-6 text-sm text-[color:var(--fg-faint)]">
-                判断の経緯は
-                <a
-                    href="https://github.com/h-kusaba-1001/portfolio2026/blob/main/docs/architecture-decisions.md"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[color:var(--accent)] underline underline-offset-4"
-                >
-                    ADR
-                </a>
-                に全て残しています。判断を変えた記録も消していません。
+            <p className="mt-8 text-[color:var(--fg-muted)]">
+                いずれも「使えないから避けた」のではなく、
+                <strong className="font-semibold text-[color:var(--fg)]">
+                    この要件では要らないと判断して外した
+                </strong>
+                ものです。必要になれば足せる状態は保っています。
             </p>
         </section>
     );

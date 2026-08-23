@@ -9,7 +9,7 @@ import type { SectionProps } from '@/types';
  */
 export default function Experience({ section }: { section: SectionProps }) {
     return (
-        <section id="experience" className="scroll-mt-20" data-testid="section-experience">
+        <section className="max-w-3xl scroll-mt-24" id="experience" data-testid="section-experience">
             <SectionLead eyebrow="やってきたこと">
                 要件定義から本番運用まで、
                 <br />

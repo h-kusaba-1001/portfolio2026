@@ -1,6 +1,6 @@
 import MarkdownBlock from '@/components/content/MarkdownBlock';
 import type { SectionProps } from '@/types';
-import { EXTENSION_ITEMS, nodeById, nodeKey } from './nodes';
+import { nodeById, nodeKey } from './nodes';
 
 /**
  * 選択中のノードの選定理由を表示する（Q3 = A: 図の下に固定枠）。
@@ -54,18 +54,6 @@ export default function NodePanel({
                 </div>
             )}
 
-            {node.kind === 'extension' && (
-                <ul className="mt-5 flex flex-wrap gap-2" data-testid="extension-items">
-                    {EXTENSION_ITEMS.map((item) => (
-                        <li
-                            key={item}
-                            className="rounded-full border border-dashed border-[color:var(--border)] px-3 py-1 text-xs text-[color:var(--fg-muted)]"
-                        >
-                            {item}
-                        </li>
-                    ))}
-                </ul>
-            )}
         </div>
     );
 }

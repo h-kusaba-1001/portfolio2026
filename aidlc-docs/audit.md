@@ -667,3 +667,45 @@ Q3: "C"（上部に固定ヘッダ）
 
 **未確認**: 構成図の見え方・粒の速度・375px の縦積み・ダークモードは**目視していない**。ADR-009 でブラウザテストを書かない方針のため機械では担保できず、backlog の B-4 として「目視確認（最重要）」に格上げした。
 **Context**: CONSTRUCTION フェーズ / UoW-4 完了。全 UoW の実装が完了
+
+## CONSTRUCTION / UoW-3・UoW-4: Code Generation - Approval
+**Timestamp**: 2026-08-23T01:10:00Z
+**AI Prompt**: "Continue to Next Stage - 承認し、Build and Test（最終確認）へ進む"
+**User Response**: "✅ Continue to Next Stage"
+**Status**: Approved
+**Context**: UoW-3・UoW-4 の Code Generation を承認。全 UoW の実装が完了
+
+---
+
+## Build and Test Stage
+**Timestamp**: 2026-08-23T01:10:00Z
+**Build Status**: **Success**（Vite 8 / JS 330.11 kB・CSS 42.33 kB / 0.6 秒。`tsc --noEmit` エラーなし）
+**Test Status**: **Pass（30 passed / 168 assertions / 0.77 秒）**
+**Files Generated**:
+- build-instructions.md
+- unit-test-instructions.md
+- integration-test-instructions.md
+- performance-test-instructions.md
+- security-test-instructions.md
+- build-and-test-summary.md
+
+**判断と記録**:
+- **結合テストの独立スイートは作らなかった**。プロセスをまたぐ結合点（DB / 外部 API / キュー / 他サービス）が存在しないため。代わりに Feature テストが実際に通している 6 つの結合点を明示し、そのうち「サーバの `HeadingKey` ↔ フロントの `headingKey.ts`」が唯一「実装が 2 箇所にある」危険な結合点であることを記した。
+- **性能テストは実施しないと明記**。性能目標が存在せず（U1-PF-5 / U1-SC-3）、さらに負荷をかけること自体がアカウント同時実行上限 10（ADR-016）と NFR-1（費用）に衝突するため。代わりに実測値（Lambda 実行 18.8 ms / メモリ 138 MB）を記録した。「目標を置かないことも設計判断である」ことを記した。
+- **カバレッジは測定しないと明記**。率を目標にすると「通したいだけのテスト」を書く動機が生まれるため、代わりに「壊れたときに困る経路」を名指しで押さえる方針（ADR-009）を記した。
+- **未達を隠さず記載**: S-1（SBOM 未実施 = SECURITY-10 の一部未達）、P-2（キャッシュ）、V-7（ログ形式）、**B-4（目視確認）**。完了条件 7 項目のうち 2 項目が「目視確認待ち」であることを summary に明示した。ADR-009 でブラウザテストを書かない方針にした結果、ここは人の目でしか埋められない。
+**Context**: CONSTRUCTION フェーズ / Build and Test 完了
+
+---
+
+## CONSTRUCTION / UoW-4: 図の作り直し（レビュー指摘への対応）
+**Timestamp**: 2026-08-23T01:30:00Z
+**User Input**: "AWS公式のアイコンを使ってほしいです さらに、絵が思ったより地味です もう少し派手なつくりにしてください 図とその中の文字をより派手にしてください 図とテキストの大きさはクラスメソッドのブログを参考にしてください"
+**AI Response**: AWS Architecture Icons の公式パッケージ（14 MB）をコンテナ内でダウンロードし、必要な 4 種（CloudFront / API Gateway / Lambda / S3）を `public/aws-icons/` に配置。**外部から読み込まず自前ホストする**（CSP `img-src 'self'` / SECURITY-13）。ライセンスは「アーキテクチャ図の作成における利用」を AWS が許諾している範囲で、アイコンは無改変のまま使用。最終的な条件確認は AWS の規約に従う旨を summary に記載。
+
+図の強調: ノード 150×62 → 180×108、図の領域 860×430 → 1040×580、ラベル 13px → 16px 太字、サービス色の帯（AWS カテゴリ色）、線 1.5px → 2.5px + 矢印マーカー、粒を半径 4 → 7 に拡大し glow フィルタで発光、選択時に外周リング。文字サイズは本文 16→17px（sm 以上）、セクションの結論を text-xl → text-2xl/3xl 太字に引き上げ。
+
+**⚠️ 踏んだ問題**: `public/aws-icons/` に置いてデプロイしたが**本番で 404**。原因は Lift の `assets` が `/build/*` しか S3 に配信せず、それ以外は Lambda に流れて Bref の FPM ハンドラが静的ファイルを返さないため。`serverless.yml` の `assets` に `'/aws-icons/*'` を追加して解消。**`public/` に置いただけでは本番で配信されない**ことを backlog の運用注意に追加した。
+
+デプロイ後に 4 アイコンとも 200 を確認。テスト 30 passed 維持。
+**Context**: CONSTRUCTION フェーズ / UoW-4 の図の作り直し

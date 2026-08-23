@@ -34,7 +34,7 @@ export default function Portfolio({ sections }: PortfolioPageProps) {
         <div className="min-h-screen">
             <SiteHeader />
 
-            <main className="mx-auto max-w-3xl px-6 pb-28">
+            <main className="mx-auto max-w-5xl px-6 pb-28">
                 <Hero />
 
                 <div className="space-y-24 sm:space-y-32">
@@ -53,8 +53,8 @@ export default function Portfolio({ sections }: PortfolioPageProps) {
 
 function SiteHeader() {
     return (
-        <div className="sticky top-0 z-10 border-b border-[color:var(--border)] bg-[color:var(--bg)]/85 backdrop-blur">
-            <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-3">
+        <div className="sticky top-0 z-20 border-b border-[color:var(--border)] bg-[color:var(--bg)]">
+            <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
                 <a href="#top" className="text-sm font-semibold tracking-tight" data-testid="site-header-home">
                     HK Portfolio
                 </a>
@@ -78,7 +78,7 @@ function SiteHeader() {
 function SiteFooter() {
     return (
         <footer className="border-t border-[color:var(--border)]">
-            <div className="mx-auto max-w-3xl px-6 py-8 text-sm text-[color:var(--fg-faint)]">
+            <div className="mx-auto max-w-5xl px-6 py-8 text-sm text-[color:var(--fg-faint)]">
                 このサイト自体が、上の構成図のとおりに動いています。
             </div>
         </footer>

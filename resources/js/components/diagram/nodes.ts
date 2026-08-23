@@ -22,6 +22,10 @@ export type DiagramNodeDef = {
     caption?: string;
     /** content/stack.md の H2 見出し。無い場合はパネルを持たない */
     heading?: string;
+    /** public/aws-icons/ 配下の AWS 公式アイコン。無い場合は記号を描く */
+    icon?: string;
+    /** ノードの色味（AWS のサービスカテゴリ色に合わせる） */
+    tint?: string;
     kind: NodeKind;
     /** 横並びレイアウト（デスクトップ）での左上座標 */
     wide: Point;
@@ -32,91 +36,100 @@ export type DiagramNodeDef = {
 export type DiagramEdge = {
     from: string;
     to: string;
-    /** 破線にする（拡張ポイントへの接続） */
+    /** 破線にする */
     dashed?: boolean;
     /** 光の粒を流すか。リクエストの流れだけを流す */
     animated?: boolean;
+    /**
+     * 線に添えるラベル。CloudFront がパスで行き先を振り分けていることを示す。
+     * これが無いと「リクエストが S3 へ流れ込む」ようにも読めてしまう。
+     */
+    label?: string;
 };
 
-export const WIDE = { width: 860, height: 430, nodeW: 150, nodeH: 62 };
-export const NARROW = { width: 340, height: 700, nodeW: 200, nodeH: 62 };
+// 横一列。矢印が折り返さない配置にする。
+export const WIDE = { width: 1120, height: 400, nodeW: 176, nodeH: 112 };
+export const NARROW = { width: 360, height: 880, nodeW: 150, nodeH: 118 };
 
 export const NODES: DiagramNodeDef[] = [
     {
         id: 'browser',
         label: 'Browser',
         caption: '閲覧者',
+        // 特定の製品を指さない汎用のブラウザ記号（自作）。
+        // 商標を持ち込まずに済み、CSP の img-src 'self' も満たす。
+        icon: '/brand/browser.svg',
         kind: 'edge',
-        wide: { x: 20, y: 40 },
-        narrow: { x: 70, y: 10 },
+        tint: '#64748b',
+        wide: { x: 20, y: 60 },
+        narrow: { x: 105, y: 10 },
     },
     {
         id: 'cloudfront',
         label: 'CloudFront',
-        caption: 'CDN',
+        caption: 'CDN / TLS 終端',
         heading: 'CloudFront',
+        icon: '/aws-icons/cloudfront.svg',
+        tint: '#8C4FFF',
         kind: 'core',
-        wide: { x: 240, y: 40 },
-        narrow: { x: 70, y: 120 },
+        wide: { x: 246, y: 60 },
+        narrow: { x: 105, y: 150 },
     },
     {
         id: 's3',
         label: 'S3',
         caption: '静的アセット',
         heading: 'S3',
+        icon: '/aws-icons/s3.svg',
+        tint: '#7AA116',
         kind: 'storage',
-        wide: { x: 240, y: 200 },
-        narrow: { x: 10, y: 230 },
+        wide: { x: 246, y: 250 },
+        narrow: { x: 10, y: 300 },
     },
     {
         id: 'apigateway',
         label: 'API Gateway',
         caption: 'HTTP API',
         heading: 'API Gateway',
+        icon: '/aws-icons/api-gateway.svg',
+        tint: '#8C4FFF',
         kind: 'core',
-        wide: { x: 460, y: 40 },
-        narrow: { x: 130, y: 340 },
+        wide: { x: 472, y: 60 },
+        narrow: { x: 105, y: 440 },
     },
     {
         id: 'lambda',
         label: 'Lambda',
         caption: 'Bref / PHP 8.4',
         heading: 'Lambda (Bref)',
+        icon: '/aws-icons/lambda.svg',
+        tint: '#ED7100',
         kind: 'core',
-        wide: { x: 680, y: 40 },
-        narrow: { x: 130, y: 450 },
+        wide: { x: 698, y: 60 },
+        narrow: { x: 105, y: 580 },
     },
     {
         id: 'laravel',
-        label: 'Laravel + Inertia',
-        caption: 'Markdown を読む',
+        label: 'Laravel',
+        caption: 'Inertia / Markdown',
         heading: 'Laravel + Inertia.js',
+        icon: '/brand/laravel.svg',
+        tint: '#FF2D20',
         kind: 'core',
-        wide: { x: 680, y: 200 },
-        narrow: { x: 130, y: 560 },
-    },
-    {
-        id: 'extension',
-        label: '拡張ポイント',
-        caption: '今は無い層',
-        heading: '拡張ポイント',
-        kind: 'extension',
-        wide: { x: 460, y: 320 },
-        narrow: { x: 10, y: 620 },
+        wide: { x: 924, y: 60 },
+        narrow: { x: 105, y: 720 },
     },
 ];
 
 export const EDGES: DiagramEdge[] = [
     { from: 'browser', to: 'cloudfront', animated: true },
-    { from: 'cloudfront', to: 'apigateway', animated: true },
+    { from: 'cloudfront', to: 'apigateway', animated: true, label: '/*' },
     { from: 'apigateway', to: 'lambda', animated: true },
     { from: 'lambda', to: 'laravel', animated: true },
-    { from: 'cloudfront', to: 's3' },
-    { from: 'laravel', to: 'extension', dashed: true },
+    // S3 は CloudFront から分岐する枝（docs/requirements.md §6）。
+    // S3 が API Gateway を呼ぶわけではない。CloudFront がパスで振り分けている。
+    { from: 'cloudfront', to: 's3', label: '/build/*' },
 ];
-
-/** 拡張ポイントの中に並べる要素。図には出さず、パネル側で補足する */
-export const EXTENSION_ITEMS = ['DynamoDB', 'SQS', 'Bref X-Ray', 'Inertia SSR', 'オリジン遮断'];
 
 export function nodeById(id: string): DiagramNodeDef | undefined {
     return NODES.find((node) => node.id === id);

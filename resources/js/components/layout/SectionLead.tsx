@@ -18,10 +18,10 @@ export default function SectionLead({
 }) {
     return (
         <div className="max-w-2xl">
-            <p className="text-xs font-semibold tracking-widest text-[color:var(--accent)] uppercase">
+            <p className="text-lg font-bold tracking-widest text-[color:var(--accent)] uppercase">
                 {eyebrow}
             </p>
-            <p className="mt-3 text-xl leading-snug font-semibold tracking-tight sm:text-2xl">
+            <p className="mt-4 text-2xl leading-snug font-bold tracking-tight sm:text-3xl">
                 {children}
             </p>
         </div>

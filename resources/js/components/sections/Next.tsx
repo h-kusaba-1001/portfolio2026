@@ -10,7 +10,7 @@ import type { SectionProps } from '@/types';
  */
 export default function Next({ section }: { section: SectionProps }) {
     return (
-        <section id="next" className="scroll-mt-20" data-testid="section-next">
+        <section className="max-w-3xl scroll-mt-24" id="next" data-testid="section-next">
             <div className="grid gap-8 sm:grid-cols-5">
                 <div className="sm:col-span-2">
                     <SectionLead eyebrow="これから">

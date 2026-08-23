@@ -90,6 +90,10 @@ constructs:
         type: server-side-website
         assets:
             '/build/*': public/build
+            # AWS 公式アイコン。自前ホストして CSP の img-src 'self' を満たす。
+            # ここに書かないと Lambda 側に流れて 404 になる。
+            '/aws-icons/*': public/aws-icons
+            '/brand/*': public/brand
         extensions:
             # Lift にはアクセスログの設定オプションが無いため、
             # CloudFormation リソースを直接上書きする（F-3 / Q2 = A）

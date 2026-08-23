@@ -147,9 +147,9 @@ aidlc-docs/
 ### Step 11: サプライチェーン対応（NFR-S5 / SECURITY-10）
 - [x] 11-1. `composer.lock` と `package-lock.json` がコミット対象であることを確認する
 - [x] 11-2. `composer audit` と `npm audit` を実行し、結果を記録する
-- [ ] 11-3. CycloneDX による SBOM 生成の手順を用意する
-      → **未実施。** 一括更新で誤ってチェック済みにしていたものを 2026-08-22 に訂正。
-        `docs/backlog.md` の S-1 として管理する
+- [x] 11-3. CycloneDX による SBOM 生成の手順を用意する
+      → 2026-08-22 に未実施と判明（一括更新での誤チェックを訂正）。
+        **2026-08-23 に `bin/sbom.sh` として実装し完了。**
 - [x] 11-4. **D-3 の確認**: 本番デプロイ時に開発用依存を除外する手順を確定する
 
 ### Step 12: ローカル動作確認（B-1 の完了判定）
@@ -270,8 +270,7 @@ X) Other (please describe after [Answer]: tag below)
 
 ## 7. 完了条件
 
-- [ ] Step 1〜16 の全チェックボックスが `[x]` になっている
-      → **11-3（SBOM）のみ未実施。`docs/backlog.md` の S-1 で管理**
+- [x] Step 1〜16 の全チェックボックスが `[x]` になっている
 - [x] `sail test` が通る（9 passed / 48 assertions）
 - [x] ローカルでページが表示される（B-1）
 - [x] 公開 URL でページが表示される（B-2）

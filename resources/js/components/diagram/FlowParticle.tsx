@@ -9,7 +9,7 @@
  */
 export default function FlowParticle({ path, delay }: { path: string; delay: number }) {
     return (
-        <circle r={4} fill="var(--accent)" opacity={0.9}>
+        <circle r={7} fill="var(--accent)" opacity={0.95} filter="url(#glow)">
             <animateMotion
                 dur="2.4s"
                 begin={`${delay}s`}

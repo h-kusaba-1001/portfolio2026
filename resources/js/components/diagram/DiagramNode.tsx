@@ -10,30 +10,20 @@ type Props = {
     onSelect: (id: string) => void;
 };
 
-const FILL: Record<DiagramNodeDef['kind'], string> = {
-    edge: 'var(--diagram-node-quiet)',
-    core: 'var(--diagram-node)',
-    storage: 'var(--diagram-node-quiet)',
-    extension: 'transparent',
-};
+const ICON = 46;
 
 /**
- * ノード 1 つ。見出しを持つノードだけが押せる。
+ * ノード 1 つ。
  *
- * 押せないノード（Browser など）は説明が無いため、
- * カーソルもフォーカスも与えない。
+ * AWS のサービスは公式アイコン（public/aws-icons/）を使う。
+ * 自前ホストなので CSP の img-src 'self' を満たす（外部から読み込まない）。
+ *
+ * 見出しを持つノードだけが押せる。押せないノードにはフォーカスも与えない。
  */
-export default function DiagramNode({
-    node,
-    x,
-    y,
-    width,
-    height,
-    selected,
-    onSelect,
-}: Props) {
+export default function DiagramNode({ node, x, y, width, height, selected, onSelect }: Props) {
     const selectable = node.heading !== undefined;
     const dashed = node.kind === 'extension';
+    const tint = node.tint ?? 'var(--diagram-border)';
 
     return (
         <g
@@ -56,21 +46,55 @@ export default function DiagramNode({
             aria-label={selectable ? `${node.label} の選定理由を見る` : undefined}
             data-testid={`diagram-node-${node.id}`}
         >
+            {/* 選択時に外側を光らせる */}
+            {selected && (
+                <rect
+                    x={-5}
+                    y={-5}
+                    width={width + 10}
+                    height={height + 10}
+                    rx={16}
+                    fill="none"
+                    stroke={tint}
+                    strokeWidth={2}
+                    opacity={0.45}
+                />
+            )}
+
             <rect
                 width={width}
                 height={height}
-                rx={10}
-                fill={FILL[node.kind]}
-                stroke={selected ? 'var(--accent)' : 'var(--diagram-border)'}
-                strokeWidth={selected ? 2 : 1}
-                strokeDasharray={dashed ? '6 4' : undefined}
+                rx={12}
+                fill={dashed ? 'transparent' : 'var(--diagram-node)'}
+                stroke={selected ? tint : dashed ? tint : 'var(--diagram-border)'}
+                strokeWidth={selected ? 2.5 : dashed ? 2 : 1.5}
+                strokeDasharray={dashed ? '8 5' : undefined}
             />
+
+            {/* サービス色の帯。図全体に色を入れて単調さを消す */}
+            {!dashed && (
+                <rect width={width} height={4} rx={2} fill={tint} opacity={selected ? 1 : 0.85} />
+            )}
+
+            {node.icon !== undefined ? (
+                <image
+                    href={node.icon}
+                    x={(width - ICON) / 2}
+                    y={14}
+                    width={ICON}
+                    height={ICON}
+                    preserveAspectRatio="xMidYMid meet"
+                />
+            ) : (
+                <circle cx={width / 2} cy={14 + ICON / 2} r={ICON / 2 - 6} fill={tint} opacity={0.18} />
+            )}
 
             <text
                 x={width / 2}
-                y={node.caption === undefined ? height / 2 + 5 : height / 2 - 3}
+                y={height - 26}
                 textAnchor="middle"
-                className="fill-[color:var(--fg)] text-[13px] font-medium"
+                className="fill-[color:var(--fg)]"
+                style={{ fontSize: 18, fontWeight: 700 }}
             >
                 {node.label}
             </text>
@@ -78,9 +102,10 @@ export default function DiagramNode({
             {node.caption !== undefined && (
                 <text
                     x={width / 2}
-                    y={height / 2 + 15}
+                    y={height - 9}
                     textAnchor="middle"
-                    className="fill-[color:var(--fg-faint)] text-[10px]"
+                    className="fill-[color:var(--fg-muted)]"
+                    style={{ fontSize: 12.5 }}
                 >
                     {node.caption}
                 </text>

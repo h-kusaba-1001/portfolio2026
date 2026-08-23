@@ -50,7 +50,7 @@ export default function Section({ id, title, children }: Props) {
         <section
             ref={ref}
             id={id}
-            className="fade-in scroll-mt-20"
+            className="fade-in scroll-mt-24"
             data-visible={visible}
             data-testid={`section-${id}`}
         >

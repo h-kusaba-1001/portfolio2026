@@ -29,5 +29,5 @@ Thumbs.db
 # --- portfolio2026 ---
 /.serverless
 /.laravel-tmp
-/sbom.json
-/sbom.xml
+/sbom-composer.json
+/sbom-npm.json

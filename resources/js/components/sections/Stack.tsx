@@ -16,22 +16,29 @@ export default function Stack({ section }: { section: SectionProps }) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
     return (
-        <section id="stack" className="scroll-mt-20" data-testid="section-stack">
+        <section id="stack" className="scroll-mt-24" data-testid="section-stack">
             <SectionLead eyebrow="技術構成">
                 リクエストは 5 つの箱を通るだけ。
                 <br />
                 データベースはどこにもありません。
             </SectionLead>
 
-            <div className="mt-8 rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-subtle)] p-4 sm:p-6">
+            {/* content/stack.md のリード文。見出しの直下に置く */}
+            {section.available && section.lead !== '' && (
+                <div className="mt-6 max-w-3xl" data-testid="stack-lead">
+                    <MarkdownBlock html={section.lead} />
+                </div>
+            )}
+
+            <div className="mt-8 rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-subtle)] p-3 sm:p-8">
                 <ArchitectureDiagram selectedId={selectedId} onSelect={setSelectedId} />
             </div>
 
-            <p className="mt-3 text-xs text-[color:var(--fg-faint)]">
-                図の要素を押すと、それを選んだ理由が下に出ます。破線は「今は無い層」です。
+            <p className="mt-4 text-sm text-[color:var(--fg-faint)]">
+                図の要素を押すと、それを選んだ理由が下に出ます。
             </p>
 
-            <div className="mt-6">
+            <div className="mt-6 max-w-3xl">
                 <NodePanel selectedId={selectedId} stack={section} />
             </div>
 
@@ -39,17 +46,6 @@ export default function Stack({ section }: { section: SectionProps }) {
                 <div className="mt-6">
                     <ContentUnavailable sectionId={section.id} />
                 </div>
-            )}
-
-            {section.available && section.lead !== '' && (
-                <details className="mt-8 rounded-xl border border-[color:var(--border)] px-5 py-4">
-                    <summary className="cursor-pointer text-sm font-medium">
-                        この構成をひとことで
-                    </summary>
-                    <div className="mt-3">
-                        <MarkdownBlock html={section.lead} />
-                    </div>
-                </details>
             )}
         </section>
     );

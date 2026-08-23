@@ -3,9 +3,6 @@
 このサイトは AWS Lambda の上で動く Laravel です。
 データベースを持たず、コンテンツは Markdown を Laravel が読んで返しています。
 
-選定理由の原典は [ADR](../docs/architecture-decisions.md) を参照してください。
-以下は構成図の各ノードから開くパネルの原稿です。
-
 ## CloudFront
 
 Lift プラグインの `server-side-website` 構造で構築。
@@ -17,6 +14,14 @@ CloudFront を手で組まずに済み、アセットの S3 アップロード�
 ## S3
 
 静的アセット（JavaScript・CSS）の置き場所です。
+
+**CloudFront が URL のパスを見て、行き先を振り分けています。**
+`/build/*` や `/aws-icons/*` は S3、それ以外は API Gateway へ。
+S3 は聞かれたファイルを返すだけで、他所にリクエストを出すことはありません。
+
+実際には 1 本の流れではなく、**別々のリクエストが 2 種類**あります。
+まず HTML を取りに行き（API Gateway 経由）、
+その HTML に書かれた JavaScript を改めて取りに行く（S3 経由）、という順です。
 バケットはパブリックアクセスを全てブロックしており、**直接は開けません**。
 CloudFront だけが読める設定にしています。
 
@@ -25,14 +30,23 @@ Vite がファイル名にハッシュを付けるため、内容が変われば
 
 CloudFront のアクセスログも、別のバケットに 14 日だけ保管しています。
 
+このバケットと CloudFront は手で作っていません。
+**Serverless Framework（osls）の Lift プラグイン**が、
+`server-side-website` の定義から一式を組み立て、アセットのアップロードまで行います。
+**受託時代にサーバレス構成の設計と運用で培ったものを、そのまま使っています。**
+
 ## API Gateway
 
 HTTP API のワイルドカードルートで、全リクエストを Lambda に流しています。
 
 ## Lambda (Bref)
 
-PHP を Lambda で動かすための Bref 3.0 を使用。
+PHP を Lambda で動かすための **Bref 3.0** を使用。
 完全従量課金で、この規模なら無料枠に収まります。
+
+**受託開発の現場で bref PHP と Laravel によるサーバレス API を作った経験を、
+そのままこのサイトに持ち込んでいます。**
+初めて触る技術ではなく、実務で運用まで見てきた構成です。
 
 **固定費が跳ねるのは Lambda ではなく、RDS・NAT Gateway・ALB です。**
 そこを避ける設計にしました。

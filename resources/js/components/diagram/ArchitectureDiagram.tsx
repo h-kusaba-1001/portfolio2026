@@ -64,6 +64,27 @@ function Svg({
             role="img"
             aria-label="Browser から CloudFront、API Gateway、Lambda、Laravel へとリクエストが流れる構成図"
         >
+            <defs>
+                <marker
+                    id={`arrow-${layout.width}`}
+                    viewBox="0 0 10 10"
+                    refX="9"
+                    refY="5"
+                    markerWidth="7"
+                    markerHeight="7"
+                    orient="auto-start-reverse"
+                >
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--diagram-arrow)" />
+                </marker>
+
+                <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+                    <feGaussianBlur stdDeviation="3.5" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
             {EDGES.map((edge) => {
                 const from = NODES.find((n) => n.id === edge.from);
                 const to = NODES.find((n) => n.id === edge.to);
@@ -80,13 +101,26 @@ function Svg({
                             id={`edge-${edge.from}-${edge.to}`}
                             d={d}
                             fill="none"
-                            stroke="var(--diagram-border)"
-                            strokeWidth={1.5}
-                            strokeDasharray={edge.dashed === true ? '6 5' : undefined}
+                            stroke="var(--diagram-arrow)"
+                            strokeWidth={edge.dashed === true ? 2 : 2.5}
+                            strokeDasharray={edge.dashed === true ? '8 6' : undefined}
+                            markerEnd={`url(#arrow-${layout.width})`}
                         />
 
+                        {edge.label !== undefined && (
+                            <text
+                                x={labelPos(box(from), box(to)).x}
+                                y={labelPos(box(from), box(to)).y}
+                                textAnchor="middle"
+                                className="fill-[color:var(--fg-faint)]"
+                                style={{ fontSize: 12, fontWeight: 600 }}
+                            >
+                                {edge.label}
+                            </text>
+                        )}
+
                         {edge.animated === true && !prefersReducedMotion && (
-                            <FlowParticle path={d} delay={EDGES.indexOf(edge) * 0.45} />
+                            <FlowParticle path={d} delay={EDGES.indexOf(edge) * 0.4} />
                         )}
                     </g>
                 );
@@ -120,6 +154,17 @@ type Box = {
     right: number;
     bottom: number;
 };
+
+/** 線に添えるラベルの位置。線と重ならないよう少しずらす */
+function labelPos(from: Box, to: Box): { x: number; y: number } {
+    const sameRow = Math.abs(from.cy - to.cy) < 8;
+
+    if (sameRow) {
+        return { x: (from.right + to.x) / 2, y: from.cy - 10 };
+    }
+
+    return { x: (from.cx + to.cx) / 2 + 26, y: (from.bottom + to.y) / 2 + 4 };
+}
 
 /**
  * 2 つのノードを結ぶ線。
