@@ -112,7 +112,7 @@ function Svg({
                                 x={labelPos(box(from), box(to)).x}
                                 y={labelPos(box(from), box(to)).y}
                                 textAnchor="middle"
-                                className="fill-[color:var(--fg-muted)] stroke-[color:var(--bg-subtle)]"
+                                className="fill-[color:var(--fg-muted)] stroke-[color:var(--surface)]"
                                 fontSize={12}
                                 fontWeight={600}
                                 /*

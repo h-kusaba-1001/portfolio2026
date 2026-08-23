@@ -71,18 +71,31 @@
 */
 :root {
     color-scheme: light;
-    --bg: #ffffff;
-    --bg-subtle: #f8fafc;
-    --fg: #0f172a;
-    --fg-muted: #475569;
-    --fg-faint: #94a3b8;
-    --border: #e2e8f0;
-    --accent: #047857;
-    --accent-hover: #065f46;
-    --diagram-node: #f0fdf4;
-    --diagram-node-quiet: #f8fafc;
-    --diagram-border: #cbd5e1;
-    --diagram-arrow: #94a3b8;
+
+    /*
+      紙（--bg）の上に、沈んだ面（--surface）と白いタイル（--diagram-node）を置く。
+      以前は白 #ffffff と #f8fafc の 2 段しかなく、その差が 1.046:1 しか無かったため
+      カードが「面」ではなく「うっすら汚れた四角」に見えていた。
+
+      色は Tailwind の slate をそのまま使うのをやめ、ごくわずかに温度を持たせている。
+      図の中には AWS と Laravel のブランド色（変更できない）が入るため、
+      **ページ側は彩度を持たず、緑は「信号」ではなく「緑みのインク」として使う。**
+    */
+    --bg: #faf9f7;
+    --surface: #f1efea;
+    --code-bg: #eae7e0;
+    --fg: #1a1a19;
+    --fg-muted: #4a4f4d;
+    /* 旧 #94a3b8 は白背景で 2.56:1 しかなく基準割れだった。4.28:1 に引き上げ */
+    --fg-faint: #6b7a75;
+    --border: #e5e2db;
+    /* 旧 #047857 は S3 のブランド緑と同じ家族に見えていた。深く落として衝突を避ける */
+    --accent: #0d5847;
+    --accent-hover: #0a4437;
+    /* ノードは白。色はサービスごとの帯とアイコンだけが持つ */
+    --diagram-node: #ffffff;
+    --diagram-border: #d8d4cb;
+    --diagram-arrow: #8a938e;
 }
 
 /*
@@ -99,35 +112,37 @@
 @media (prefers-color-scheme: dark) {
     :root:not(.light) {
         color-scheme: dark;
-        --bg: #0b1120;
-        --bg-subtle: #111a2e;
-        --fg: #e2e8f0;
-        --fg-muted: #94a3b8;
-        --fg-faint: #64748b;
-        --border: #1e293b;
-        --accent: #34d399;
-        --accent-hover: #6ee7b7;
-        --diagram-node: #132a24;
-        --diagram-node-quiet: #111a2e;
-        --diagram-border: #334155;
-        --diagram-arrow: #64748b;
+        --bg: #101413;
+        --surface: #191f1d;
+        --code-bg: #232a28;
+        --fg: #e7e9e7;
+        --fg-muted: #a2aeaa;
+        --fg-faint: #7e8a86;
+        --border: #2a3230;
+        /* 旧 #34d399 は地の色に対して 9.79:1 で眩しすぎた */
+        --accent: #5eb996;
+        --accent-hover: #7cc9ab;
+        --diagram-node: #232a28;
+        --diagram-border: #333c39;
+        --diagram-arrow: #6f7b77;
     }
 }
 
 :root.dark {
     color-scheme: dark;
-    --bg: #0b1120;
-    --bg-subtle: #111a2e;
-    --fg: #e2e8f0;
-    --fg-muted: #94a3b8;
-    --fg-faint: #64748b;
-    --border: #1e293b;
-    --accent: #34d399;
-    --accent-hover: #6ee7b7;
-    --diagram-node: #132a24;
-    --diagram-node-quiet: #111a2e;
-    --diagram-border: #334155;
-    --diagram-arrow: #64748b;
+    --bg: #101413;
+    --surface: #191f1d;
+    --code-bg: #232a28;
+    --fg: #e7e9e7;
+    --fg-muted: #a2aeaa;
+    --fg-faint: #7e8a86;
+    --border: #2a3230;
+    /* 旧 #34d399 は地の色に対して 9.79:1 で眩しすぎた */
+    --accent: #5eb996;
+    --accent-hover: #7cc9ab;
+    --diagram-node: #232a28;
+    --diagram-border: #333c39;
+    --diagram-arrow: #6f7b77;
 }
 
 body {
@@ -229,7 +244,7 @@ body {
 .prose-basic code {
     font-family: var(--font-mono);
     font-size: 0.875em;
-    background-color: var(--bg-subtle);
+    background-color: var(--code-bg);
     border: 1px solid var(--border);
     border-radius: 0.25rem;
     padding: 0.1em 0.35em;

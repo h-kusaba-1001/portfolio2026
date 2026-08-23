@@ -28,8 +28,12 @@ export default function ThemeToggle() {
                     aria-pressed={theme === option.value}
                     className={
                         'rounded-full px-2.5 py-1 text-xs transition-colors ' +
+                        /*
+                            選択状態を彩度の高い塗りにすると、ページで一番強い色が
+                            設定コントロールになってしまう。面と文字色で示す。
+                        */
                         (theme === option.value
-                            ? 'bg-[color:var(--accent)] text-[color:var(--bg)]'
+                            ? 'bg-[color:var(--surface)] font-medium text-[color:var(--accent)]'
                             : 'text-[color:var(--fg-muted)] hover:text-[color:var(--fg)]')
                     }
                     data-testid={`theme-toggle-${option.value}`}

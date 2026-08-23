@@ -39,7 +39,7 @@ export default function NodePanel({
 
     return (
         <div
-            className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-subtle)] px-5 py-6"
+            className="rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-5 py-6"
             data-testid={`node-panel-${node.id}`}
         >
             <h3 className="font-semibold">{node.label}</h3>

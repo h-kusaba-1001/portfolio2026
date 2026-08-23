@@ -29,7 +29,7 @@ export default function Stack({ section }: { section: SectionProps }) {
                 </div>
             )}
 
-            <div className="mt-8 rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-subtle)] p-3 sm:p-8">
+            <div className="mt-8 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-3 sm:p-8">
                 <ArchitectureDiagram selectedId={selectedId} onSelect={setSelectedId} />
             </div>
 

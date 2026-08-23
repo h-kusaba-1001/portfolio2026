@@ -123,7 +123,8 @@ export const NODES: DiagramNodeDef[] = [
 
 export const EDGES: DiagramEdge[] = [
     { from: 'browser', to: 'cloudfront', animated: true },
-    { from: 'cloudfront', to: 'apigateway', animated: true, label: '/*' },
+    // ラベルを '/*' にすると**コメントの開始に見える**ため、言葉で書く
+    { from: 'cloudfront', to: 'apigateway', animated: true, label: '既定' },
     { from: 'apigateway', to: 'lambda', animated: true },
     { from: 'lambda', to: 'laravel', animated: true },
     // S3 は CloudFront から分岐する枝（docs/requirements.md §6）。

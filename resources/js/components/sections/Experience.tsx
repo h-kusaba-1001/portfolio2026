@@ -16,7 +16,7 @@ export default function Experience({ section }: { section: SectionProps }) {
                 一通り自分で回してきました。
             </SectionLead>
 
-            <div className="mt-8 rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-subtle)] px-6 py-6">
+            <div className="mt-8 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] px-6 py-6">
                 {section.available ? (
                     <MarkdownBlock html={section.lead} />
                 ) : (
