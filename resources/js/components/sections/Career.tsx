@@ -17,9 +17,6 @@ export default function Career({ section }: { section: SectionProps }) {
     if (!section.available) {
         return (
             <section className="max-w-3xl" id="career" data-testid="section-career">
-                <SectionLead eyebrow="キャリアの変遷">
-                    これまでの転職理由と経験です。
-                </SectionLead>
                 <div className="mt-8">
                     <ContentUnavailable sectionId={section.id} />
                 </div>
@@ -31,10 +28,6 @@ export default function Career({ section }: { section: SectionProps }) {
 
     return (
         <section className="max-w-3xl" id="career" data-testid="section-career">
-            <SectionLead eyebrow="キャリアの変遷">
-                これまでの転職理由と経験です。
-            </SectionLead>
-
             {section.lead !== '' && (
                 <div className="mt-8">
                     <MarkdownBlock html={section.lead} />
