@@ -56,6 +56,10 @@ return [
         'X-Content-Type-Options' => 'nosniff',
         'X-Frame-Options' => 'DENY',
         'Referrer-Policy' => 'strict-origin-when-cross-origin',
+
+        // 検索結果に出さない（meta だけでなくヘッダでも出す）。
+        // HTML を解析しないクローラや、HTML 以外の応答にも効く。
+        'X-Robots-Tag' => 'noindex, nofollow',
     ],
 
 ];

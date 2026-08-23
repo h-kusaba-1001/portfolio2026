@@ -92,6 +92,13 @@ function cspForEnv(string $environment): string
     }
 }
 
+it('検索結果に出ないよう noindex を返す', function () {
+    $response = $this->get('/');
+
+    $response->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+    expect($response->getContent())->toContain('name="robots" content="noindex, nofollow"');
+});
+
 it('PHP のバージョンを漏らさない', function () {
     // SECURITY-09: ランタイムのバージョンを利用者に見せない。
     // PHP-FPM は expose_php=On だと X-Powered-By を自動で付けるため、明示的に消している。

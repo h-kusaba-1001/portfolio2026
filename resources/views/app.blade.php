@@ -18,6 +18,16 @@
     <meta name="twitter:card" content="summary">
 
     {{--
+        検索結果に出さない。
+        **robots.txt で拒否はしない。** クロール自体を止めると、
+        この noindex を読んでもらえず、かえって残り続けることがある。
+        また robots.txt を見る AI のフェッチャまで弾いてしまい、
+        プリレンダ（ADR-020）で得た「AI に読ませる」目的と衝突する。
+        ヘッダ側にも X-Robots-Tag を出している（config/security.php）。
+    --}}
+    <meta name="robots" content="noindex, nofollow">
+
+    {{--
         ファビコン。SVG に対応したブラウザは favicon.svg を、
         それ以外は .ico を使う。ブラウザが自動で取りに行く /favicon.ico は
         Lift の assets に明示しないと Lambda に流れて 404 になるため、
