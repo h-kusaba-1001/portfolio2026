@@ -6,9 +6,11 @@ import type { ContentBlock, SectionProps } from '@/types';
 /**
  * S-4 キャリアの変遷。
  *
- * **最新を上に並べる**（content/career.md は古い順に書かれているため反転する）。
+ * **content/career.md に書かれた順にそのまま並べる。** ここでは並べ替えない。
+ * 表示は上から順になるため、**Markdown 側を最新が先頭になるように書くこと。**
+ *
  * 時間の流れは、丸の大きさの遠近感と**上向きの矢印**で表す。
- * 新しいほど大きく・濃く、過去に向かうほど小さく・淡くなる。
+ * 先頭（＝最新）ほど大きく・濃く、下にいくほど小さく・淡くなる。
  * 最新が上に来る並びのため、時間は下（過去）から上（現在）へ流れる。
  */
 export default function Career({ section }: { section: SectionProps }) {
@@ -27,8 +29,7 @@ export default function Career({ section }: { section: SectionProps }) {
         );
     }
 
-    // 古い順 → 新しい順に書かれた Markdown を、表示時に反転する
-    const entries = [...section.blocks].reverse();
+    const entries = section.blocks;
 
     return (
         <section className="max-w-3xl" id="career" data-testid="section-career">
