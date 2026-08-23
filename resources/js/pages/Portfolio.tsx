@@ -1,3 +1,4 @@
+import Reveal from '@/components/layout/Reveal';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import Career from '@/components/sections/Career';
 import Experience from '@/components/sections/Experience';
@@ -35,11 +36,31 @@ export default function Portfolio({ sections }: PortfolioPageProps) {
             <main className="mx-auto max-w-5xl px-6 pb-28">
                 <Hero />
 
+                {/*
+                    Hero は最初から見えている位置にあるため、あえて包まない。
+                    開いた瞬間に主役が薄く出るのは待たされている感じになる。
+                */}
                 <div className="space-y-24 sm:space-y-32">
-                    {stack !== undefined && <Stack section={stack} />}
-                    {experience !== undefined && <Experience section={experience} />}
-                    {career !== undefined && <Career section={career} />}
-                    {next !== undefined && <Next section={next} />}
+                    {stack !== undefined && (
+                        <Reveal>
+                            <Stack section={stack} />
+                        </Reveal>
+                    )}
+                    {experience !== undefined && (
+                        <Reveal>
+                            <Experience section={experience} />
+                        </Reveal>
+                    )}
+                    {career !== undefined && (
+                        <Reveal>
+                            <Career section={career} />
+                        </Reveal>
+                    )}
+                    {next !== undefined && (
+                        <Reveal>
+                            <Next section={next} />
+                        </Reveal>
+                    )}
                 </div>
             </main>
 

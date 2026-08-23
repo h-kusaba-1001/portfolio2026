@@ -1,19 +1,26 @@
 import { useEffect, useState } from 'react';
 
+const QUERY = '(prefers-reduced-motion: reduce)';
+
 /**
  * `prefers-reduced-motion: reduce` を検出する。
  *
- * Application Design では UoW-4 の担当としていたが、
- * スクロールフェードイン（UoW-3）にも必要なため前倒しした。
+ * **初期値は初回レンダリング時に同期で読む。**
+ * 以前は初期値を true（＝動かさない）に固定していたが、そうすると
+ * 「判定前に true を見た側が『動かさない』方の分岐を確定させてしまい、
+ * 判定が false に変わっても元に戻らない」ため、
+ * スクロールのフェードインが誰にも発火しなかった。
  *
- * 初期値を true（＝動かさない）にしているのは、判定が済む前に
- * アニメーションが走ってしまうのを避けるため。
+ * SSR は使わない方針（ADR-008）なので、レンダリング時に window を読んでよい。
+ * それでも念のため window の有無は確認する。
  */
 export function usePrefersReducedMotion(): boolean {
-    const [prefersReduced, setPrefersReduced] = useState(true);
+    const [prefersReduced, setPrefersReduced] = useState(
+        () => typeof window !== 'undefined' && window.matchMedia(QUERY).matches,
+    );
 
     useEffect(() => {
-        const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const query = window.matchMedia(QUERY);
 
         setPrefersReduced(query.matches);
 

@@ -73,29 +73,29 @@
     color-scheme: light;
 
     /*
-      紙（--bg）の上に、沈んだ面（--surface）と白いタイル（--diagram-node）を置く。
-      以前は白 #ffffff と #f8fafc の 2 段しかなく、その差が 1.046:1 しか無かったため
+      地は白。その上に沈んだ面（--surface）、さらにその上に白いタイル。
+      以前は白と #f8fafc の 2 段しかなく、その差が 1.046:1 しか無かったため
       カードが「面」ではなく「うっすら汚れた四角」に見えていた。
+      いまは 1.10:1 ずつの段差があり、面として読める。
 
-      色は Tailwind の slate をそのまま使うのをやめ、ごくわずかに温度を持たせている。
       図の中には AWS と Laravel のブランド色（変更できない）が入るため、
       **ページ側は彩度を持たず、緑は「信号」ではなく「緑みのインク」として使う。**
     */
-    --bg: #faf9f7;
-    --surface: #f1efea;
-    --code-bg: #eae7e0;
-    --fg: #1a1a19;
-    --fg-muted: #4a4f4d;
-    /* 旧 #94a3b8 は白背景で 2.56:1 しかなく基準割れだった。4.28:1 に引き上げ */
-    --fg-faint: #6b7a75;
-    --border: #e5e2db;
+    --bg: #ffffff;
+    --surface: #f2f4f5;
+    --code-bg: #eceff1;
+    --fg: #14171a;
+    --fg-muted: #4a5157;
+    /* 旧 #94a3b8 は白背景で 2.56:1 しかなく基準割れだった。4.56:1 に引き上げ */
+    --fg-faint: #6e777e;
+    --border: #e2e6e8;
     /* 旧 #047857 は S3 のブランド緑と同じ家族に見えていた。深く落として衝突を避ける */
     --accent: #0d5847;
     --accent-hover: #0a4437;
     /* ノードは白。色はサービスごとの帯とアイコンだけが持つ */
     --diagram-node: #ffffff;
-    --diagram-border: #d8d4cb;
-    --diagram-arrow: #8a938e;
+    --diagram-border: #d6dbde;
+    --diagram-arrow: #8b9298;
 }
 
 /*
