@@ -43,8 +43,15 @@ it('T-1: stack.md から 7 ブロックが取れ、lead が空でない', functi
 
     expect($stack->isAvailable)->toBeTrue()
         ->and($stack->blocks)->toHaveCount(7)
-        ->and($stack->lead)->not->toBe('')
-        ->and($stack->lead)->toContain('AWS Lambda');
+        ->and($stack->lead)->not->toBe('');
+
+    // lead は「H1 の後、最初の H2 の前」の本文。
+    // **文面そのものは検証しない**（原稿は編集対象なので、書き換えるたびに
+    // テストが落ちるのは分割の検証として意味がない）。
+    // 分割位置が正しいことだけを、見出しタグが残っていないかで見る。
+    // 本文中にサービス名が出てくるのは普通なので、文字列では判定できない。
+    expect($stack->lead)->not->toContain('<h1')
+        ->and($stack->lead)->not->toContain('<h2');
 
     $keys = array_map(fn ($b) => $b->key, $stack->blocks);
 
@@ -79,7 +86,14 @@ it('T-2: H2 が無いセクションも available で、lead に本文が入る'
 it('T-3: title を H1 から取り、H1 が無ければ既定値にフォールバックする', function () {
     $content = app(GetPortfolioContent::class)();
 
-    expect($content->section(SectionId::CAREER)->title)->toBe('キャリアの変遷');
+    // 期待値は career.md の H1 そのものを読む。
+    // 文面を直書きすると、原稿を書き換えるたびに落ちてしまう。
+    $heading = trim(str_replace('#', '', strtok(file_get_contents(base_path('content/career.md')), "\n")));
+
+    expect($heading)->not->toBe('')
+        ->and($content->section(SectionId::CAREER)->title)->toBe($heading)
+        ->and($content->section(SectionId::CAREER)->title)
+        ->not->toBe(SectionId::CAREER->defaultTitle());
 
     useTempContent(['stack.md' => "本文だけのファイル\n"]);
 
