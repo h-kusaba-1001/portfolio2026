@@ -23,11 +23,7 @@ export default function Hero() {
             </h1>
 
             <p className="mt-7 max-w-xl text-[1.0625rem] leading-[1.85] text-[color:var(--fg-muted)]">
-                サーバレスで、月々のインフラ費用が限りなくゼロになるよう目指しました。
-                <strong className="font-medium text-[color:var(--fg)]">
-                    何をどう選んだのか
-                </strong>
-                を、理由つきで載せています。
+                サーバレスアーキテクチャで、月々のAWSインフラ費用ゼロをコンセプトに作りました。
             </p>
 
             <div className="mt-8">
