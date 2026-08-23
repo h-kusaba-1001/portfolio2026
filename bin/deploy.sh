@@ -59,6 +59,13 @@ else
 
     echo "==> フロントエンドをビルド"
     run npm run build
+
+    # AI・クローラ向けに、トップページをビルド時に描画して同梱する
+    # （A-1 / ADR-020）。実行時の Lambda に Node は無いので、ここで作る。
+    # **--fast では作り直さない。** 関数コードだけを差し替えるモードでは
+    # アセットも反映されないため、原稿を変えたときはフルデプロイを使うこと。
+    echo "==> トップページをプリレンダ（AI・クローラ向け）"
+    run php artisan portfolio:prerender
 fi
 
 echo "==> 本番用に開発依存を除外（この時点で vendor/bin/sail は消える）"

@@ -9,7 +9,9 @@ use App\Domain\Content\MarkdownParserInterface;
 use App\Infrastructure\Content\CachedContentRepository;
 use App\Infrastructure\Content\CommonMarkParser;
 use App\Infrastructure\Content\MarkdownContentRepository;
+use App\Support\PrerenderedPage;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\ConverterInterface;
@@ -57,6 +59,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //
+        // ビルド時に描画した HTML をルートビューに渡す（A-1 / ADR-020）。
+        // Blade がファイルを直接読むのを避けるため、ここで注入する。
+        View::composer('app', static function ($view): void {
+            $view->with('prerenderedPage', PrerenderedPage::html() ?? '');
+        });
     }
 }

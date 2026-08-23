@@ -31,6 +31,16 @@
     @inertiaHead
 </head>
 <body class="antialiased">
-    @inertia
+    {{--
+        ビルド時に描画した HTML を #app の中に入れる（A-1 / ADR-020）。
+
+        JavaScript を実行しないクローラや AI に中身を届けるのが目的。
+        React はマウント時にこの中身を捨てて描き直すため、
+        表示結果は変わらない（同じ内容が描かれる）。
+
+        $page は Inertia がルートビューに渡す変数で、@inertia が出すものと同じ。
+        プリレンダが無いとき（ローカルなど）は従来どおり空の #app になる。
+    --}}
+    <div id="app" data-page="{{ json_encode($page) }}">{!! $prerenderedPage !!}</div>
 </body>
 </html>

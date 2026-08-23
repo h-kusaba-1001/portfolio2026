@@ -31,3 +31,6 @@ Thumbs.db
 /.laravel-tmp
 /sbom-composer.json
 /sbom-npm.json
+
+# ビルド時プリレンダの生成物（ADR-020）。デプロイのたびに作り直す
+/bootstrap/ssr
