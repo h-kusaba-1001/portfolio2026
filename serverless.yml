@@ -94,6 +94,9 @@ constructs:
             # ここに書かないと Lambda 側に流れて 404 になる。
             '/aws-icons/*': public/aws-icons
             '/brand/*': public/brand
+            # ブラウザは <link> が無くても /favicon.ico を取りに行く。
+            # ここに書かないと Lambda に流れて 404 になる。
+            '/favicon.ico': public/favicon.ico
         extensions:
             # Lift にはアクセスログの設定オプションが無いため、
             # CloudFormation リソースを直接上書きする（F-3 / Q2 = A）
@@ -104,9 +107,49 @@ constructs:
                             Bucket: !GetAtt AccessLogsBucket.DomainName
                             Prefix: cloudfront/
                             IncludeCookies: false
+                        # Lift は既定で CachingDisabled を当てるため、HTML が
+                        # 一切キャッシュされず全リクエストが Lambda に届く（P-2）。
+                        # 5 秒だけキャッシュするポリシーに差し替える。
+                        DefaultCacheBehavior:
+                            CachePolicyId: !Ref HtmlCachePolicy
 
 resources:
     Resources:
+        # HTML を 5 秒だけキャッシュする（P-2 / U1-PF-4 / NFR-S9）。
+        #
+        # 5 秒にした理由は App\Http\Middleware\CacheControl のコメントを参照。
+        # 要約すると「キャッシュ無し -> 5 秒」で削減効果のほとんどが取れること、
+        # versionedAssets を使っていないため HTML を長く保持すると
+        # 消えたアセットを指し続けるリスクがあること、の 2 点。
+        #
+        # MaxTTL も 5 にしてあるので、オリジンが誤って長い max-age を返しても
+        # 5 秒を超えて保持されることはない。
+        HtmlCachePolicy:
+            Type: AWS::CloudFront::CachePolicy
+            Properties:
+                CachePolicyConfig:
+                    Name: hk-portfolio-html-${self:provider.stage}
+                    Comment: HTML を 5 秒だけキャッシュする
+                    MinTTL: 0
+                    DefaultTTL: 5
+                    MaxTTL: 5
+                    ParametersInCacheKeyAndForwardedToOrigin:
+                        EnableAcceptEncodingGzip: true
+                        EnableAcceptEncodingBrotli: true
+                        CookiesConfig:
+                            CookieBehavior: none
+                        QueryStringsConfig:
+                            QueryStringBehavior: none
+                        HeadersConfig:
+                            # 現状 Inertia のクライアント遷移は使っていないが、
+                            # 将来 <Link> を入れた場合、同じ URL に対して
+                            # HTML と Inertia の JSON が返り分かれる。
+                            # キャッシュキーに含めておかないと混線するため、
+                            # 先に入れておく（後から気づくと事故になる）。
+                            HeaderBehavior: whitelist
+                            Headers:
+                                - X-Inertia
+
         # CloudFront アクセスログの保存先（NFR-S2 / SECURITY-02）
         AccessLogsBucket:
             Type: AWS::S3::Bucket

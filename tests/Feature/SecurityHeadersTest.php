@@ -39,7 +39,6 @@ it('必要なセキュリティヘッダが揃っている', function () {
 });
 
 it('CSP の script-src を緩めていない', function () {
-    // ADR-011: 'unsafe-inline' を許可するのは style-src のみ。
     // script-src が緩んだらこのテストが落ちる。
     $csp = config('security.headers.Content-Security-Policy');
 
@@ -47,6 +46,51 @@ it('CSP の script-src を緩めていない', function () {
         ->and($csp)->not->toContain("script-src 'self' 'unsafe-inline'")
         ->and($csp)->not->toContain("'unsafe-eval'");
 });
+
+it('本番の CSP には unsafe-inline が一切含まれない', function () {
+    // ADR-018: style-src からも 'unsafe-inline' を外した。
+    // ローカルだけは Vite の HMR のために許可しているため、
+    // 本番相当の設定を読み直して検証する。
+    $csp = cspForEnv('production');
+
+    expect($csp)->toContain("style-src 'self'")
+        ->and($csp)->not->toContain("'unsafe-inline'");
+});
+
+it('ローカルでは Vite のために style-src を緩めている', function () {
+    // 開発時に画面が壊れると気づきにくいため、意図した緩和であることを固定する。
+    // テストは APP_ENV=testing で走るため、本番と同じ厳格な値が使われる。
+    $csp = cspForEnv('local');
+
+    expect($csp)->toContain("style-src 'self' 'unsafe-inline'");
+});
+
+/**
+ * 指定した APP_ENV で config/security.php を評価し直す。
+ *
+ * テストは APP_ENV=testing で走るため、そのままでは環境ごとの分岐を通らない。
+ */
+function cspForEnv(string $environment): string
+{
+    $previous = $_ENV['APP_ENV'] ?? null;
+    $_ENV['APP_ENV'] = $environment;
+    putenv('APP_ENV='.$environment);
+
+    try {
+        /** @var array{headers: array<string, string>} $config */
+        $config = require config_path('security.php');
+
+        return $config['headers']['Content-Security-Policy'];
+    } finally {
+        if ($previous === null) {
+            unset($_ENV['APP_ENV']);
+            putenv('APP_ENV');
+        } else {
+            $_ENV['APP_ENV'] = $previous;
+            putenv('APP_ENV='.$previous);
+        }
+    }
+}
 
 it('PHP のバージョンを漏らさない', function () {
     // SECURITY-09: ランタイムのバージョンを利用者に見せない。

@@ -1,12 +1,18 @@
 <?php
 
+use App\Http\Middleware\CacheControl;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RequestId;
 use App\Http\Middleware\SecurityHeaders;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -22,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // 差し替わった場合でも、戻りの経路で必ずヘッダが付く。
         $middleware->prepend([
             SecurityHeaders::class,
+            CacheControl::class,
             RequestId::class,
         ]);
 
@@ -39,11 +46,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // ValidateCsrfToken から PreventRequestForgery に変わっている。
         // 旧名で remove しても外れず、セッション不在で例外になる。
         $middleware->web(remove: [
-            \Illuminate\Cookie\Middleware\EncryptCookies::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            \Illuminate\Session\Middleware\StartSession::class,
-            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            PreventRequestForgery::class,
         ]);
 
         $middleware->web(append: [

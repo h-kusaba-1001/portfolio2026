@@ -22,10 +22,15 @@ $csp = [
     "default-src 'self'",
     "script-src 'self'",
 
-    // style-src にのみ 'unsafe-inline' を許可する（ADR-011）
-    // 構成図アニメーション（UoW-4）が style 属性を書き換えるため。
-    // script-src は厳格なまま維持しており、XSS の主経路は塞がれている。
-    "style-src 'self' 'unsafe-inline'",
+    // 本番では style-src も厳格にする（ADR-011 は ADR-018 で Superseded）。
+    // 当初 'unsafe-inline' を許可した理由は「構成図が style 属性を書き換えるため」
+    // だったが、実装では <animateMotion> を使ったため不要だった。
+    // アプリ側の style 属性も全て静的クラスと SVG 属性に置き換え済み。
+    //
+    // ローカルは Vite の HMR が <style> を注入するため、開発時のみ許可する。
+    $isLocal
+        ? "style-src 'self' 'unsafe-inline'"
+        : "style-src 'self'",
 
     "img-src 'self' data:",
     "font-src 'self'",

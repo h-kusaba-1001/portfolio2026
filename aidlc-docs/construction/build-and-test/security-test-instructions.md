@@ -12,7 +12,7 @@ sail exec laravel.test ./vendor/bin/pest
 | SECURITY | 検証内容 | テスト |
 |---|---|---|
 | 04 | ヘッダ 5 件が設定ファイルの値と一致する | `SecurityHeadersTest` |
-| 04 | **CSP の `script-src` が緩んでいない**（`unsafe-inline` / `unsafe-eval` が入っていない） | 同上 |
+| 04 | **CSP に `unsafe-inline` / `unsafe-eval` が一切入っていない**（本番。ローカルのみ Vite HMR のため `style-src` を緩和） | 同上 |
 | 04 | エラーレスポンスにもヘッダが付く | 同上 |
 | 09 | **`X-Powered-By` が出ていない**（PHP のバージョン非開示） | 同上 |
 | 09 | 404 で内部パス・スタックトレースが出ない | `ErrorPageTest` |
@@ -71,7 +71,7 @@ CycloneDX 形式で、**本番に載る依存だけ**を出力する（開発依
 
 | # | 内容 | backlog |
 |---|---|---|
-| CSP の厳格化 | `style-src` から `'unsafe-inline'` を外せるか未検証 | I-2 |
+| ~~CSP の厳格化~~ | **完了（2026-08-23）**。`style` 属性を全廃し、本番 CSP から `'unsafe-inline'` を除去（ADR-018）。**実ブラウザでの表示崩れ確認は B-4 に残る** | I-2 |
 
 ## 6. 実施しないこと
 

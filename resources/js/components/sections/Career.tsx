@@ -50,7 +50,6 @@ export default function Career({ section }: { section: SectionProps }) {
                         key={entry.key}
                         entry={entry}
                         index={index}
-                        total={entries.length}
                         isLast={index === entries.length - 1}
                     />
                 ))}
@@ -59,21 +58,34 @@ export default function Career({ section }: { section: SectionProps }) {
     );
 }
 
+/**
+ * 遠近感の段階。**先頭が最新**（最も大きく濃い）。
+ *
+ * 以前は index から幅・不透明度を計算して `style` 属性に渡していたが、
+ * それだと CSP の `style-src` に `'unsafe-inline'` が必要になる（ADR-011 / I-2）。
+ * 静的なクラスに置き換えることで、本番の CSP から `'unsafe-inline'` を外せる。
+ *
+ * 段数より項目が増えた場合は、最後の段（最も遠い）を使い続ける。
+ * 転職して項目が増えても、既存の項目の見え方が変わらないという利点もある。
+ */
+const PERSPECTIVE = [
+    { dot: 'h-7 w-7 opacity-100', heading: 'text-[20px]' },
+    { dot: 'h-[22px] w-[22px] opacity-[0.8]', heading: 'text-[18px]' },
+    { dot: 'h-[17px] w-[17px] opacity-[0.65]', heading: 'text-[17px]' },
+    { dot: 'h-3 w-3 opacity-[0.45]', heading: 'text-[15px]' },
+] as const;
+
 function Entry({
     entry,
     index,
-    total,
     isLast,
 }: {
     entry: ContentBlock;
     index: number;
-    total: number;
     isLast: boolean;
 }) {
     // 新しいほど大きく・濃く。過去に向かって遠ざかる遠近感を出す。
-    const ratio = total <= 1 ? 1 : 1 - index / (total - 1);
-    const size = 12 + ratio * 16; // 直径 12〜28px
-    const opacity = 0.45 + ratio * 0.55;
+    const step = PERSPECTIVE[Math.min(index, PERSPECTIVE.length - 1)];
 
     return (
         <li className="relative grid grid-cols-[3rem_1fr] gap-x-4 pb-12" data-testid={`career-${entry.key}`}>
@@ -101,16 +113,12 @@ function Entry({
             <div className="flex justify-center pt-1">
                 <span
                     aria-hidden="true"
-                    className="relative z-10 rounded-full bg-[color:var(--accent)] ring-4 ring-[color:var(--bg)]"
-                    style={{ width: size, height: size, opacity }}
+                    className={`relative z-10 rounded-full bg-[color:var(--accent)] ring-4 ring-[color:var(--bg)] ${step.dot}`}
                 />
             </div>
 
             <div>
-                <h3
-                    className="font-bold tracking-tight"
-                    style={{ fontSize: 15 + ratio * 5 }}
-                >
+                <h3 className={`font-bold tracking-tight ${step.heading}`}>
                     {entry.heading}
                 </h3>
                 <div className="mt-2">

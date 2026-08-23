@@ -112,8 +112,17 @@ function Svg({
                                 x={labelPos(box(from), box(to)).x}
                                 y={labelPos(box(from), box(to)).y}
                                 textAnchor="middle"
-                                className="fill-[color:var(--fg-faint)]"
-                                style={{ fontSize: 12, fontWeight: 600 }}
+                                className="fill-[color:var(--fg-muted)] stroke-[color:var(--bg-subtle)]"
+                                fontSize={12}
+                                fontWeight={600}
+                                /*
+                                    線や矢印と重なっても読めるよう、背景色で縁取る。
+                                    paint-order で「縁取り → 塗り」の順に描くと、
+                                    文字そのものは太らずに周囲だけが抜ける。
+                                */
+                                strokeWidth={3.5}
+                                paintOrder="stroke"
+                                strokeLinejoin="round"
                             >
                                 {edge.label}
                             </text>

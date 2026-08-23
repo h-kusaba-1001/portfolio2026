@@ -17,6 +17,16 @@
     <meta property="og:locale" content="ja_JP">
     <meta name="twitter:card" content="summary">
 
+    {{--
+        ファビコン。SVG に対応したブラウザは favicon.svg を、
+        それ以外は .ico を使う。ブラウザが自動で取りに行く /favicon.ico は
+        Lift の assets に明示しないと Lambda に流れて 404 になるため、
+        serverless.yml 側にも 1 行入っている。
+    --}}
+    <link rel="icon" href="/brand/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
+
     @vite(['resources/css/app.css', 'resources/js/app.tsx'])
     @inertiaHead
 </head>

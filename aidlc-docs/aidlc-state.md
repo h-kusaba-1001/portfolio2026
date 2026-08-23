@@ -4,7 +4,7 @@
 - **Project Name**: portfolio2026（HK Portfolio）
 - **Project Type**: Greenfield
 - **Start Date**: 2026-08-22T08:51:01Z
-- **Current Stage**: CONSTRUCTION - **UoW-1〜4 すべて完了・デプロイ済み**
+- **Current Stage**: OPERATIONS（プレースホルダ）- **CONSTRUCTION フェーズ完了。UoW-1〜4 すべてデプロイ済み**
 
 ## Workspace State
 - **Existing Code**: No（Markdown ドキュメントのみ。ソースコード・ビルドファイルなし）
@@ -92,23 +92,34 @@ Security 有効化に伴い、`security-baseline.md` をロード済み。全ス
 - [x] NFR Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] Infrastructure Design — EXECUTE（UoW-1 のみ）※承認済み（2026-08-22）
 - [x] Code Generation — EXECUTE（UoW-1〜4）※**全ユニット完了・デプロイ済み**（UoW-3・UoW-4 は承認待ち）
-- [x] Build and Test — EXECUTE ※承認待ち
+- [x] Build and Test — EXECUTE ※**承認済み（2026-08-23）**
 
 ### 🟡 OPERATIONS PHASE
-- [ ] Operations（プレースホルダ）
+- [x] Operations（プレースホルダ）— **到達。このワークフローでは実施内容なし**
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: **Build and Test 完了**
-- **Next Stage**: Operations（プレースホルダ）
-- **Status**: 承認待ち
+- **Current Stage**: **Operations（プレースホルダ）**
+- **Next Stage**: なし
+- **Status**: **Build and Test を承認済み（2026-08-23）**。CONSTRUCTION フェーズ完了
 
 ### 最終結果
-- ビルド成功 / **テスト 30 passed（168 assertions）** / 脆弱性 0 件
-- **完了条件のうち 2 つが「目視確認待ち」**（backlog B-4）。ADR-009 でブラウザテストを書かない方針にしたため、機械では埋められない
+- ビルド成功 / **テスト 35 passed（177 assertions）** / 脆弱性 0 件
+- **完了条件 7 項目のうち 5 項目を確認済み（B-3）。残る 2 項目は「目視確認待ち」**（backlog B-4）。
+  ADR-009 でブラウザテストを書かない方針にしたため、機械では埋められない
 
 ## 📋 残課題は `docs/backlog.md` に集約
-P-2（キャッシュ）/ S-1（SBOM 未実施）/ V-7（ログ形式）/ I-1（ビルド・デプロイ時間）/ C-1（AI-DLC をサイトに書く）ほか。**未解決事項はこのファイルを見れば分かる。**
+
+2026-08-23 時点で**機械的に処理できる項目は全て解消済み**。
+
+**2026-08-23 時点で追跡中の課題はゼロ。**
+
+| 区分 | 状態 |
+|---|---|
+| B-1〜B-4 / P-2 / S-1 / V-7 / I-1 / I-2 / D-1〜D-5 / C-1 | **全てクローズ** |
+| K-1 / K-2 | **意図的に対応しない**（判断と根拠を backlog に記載済み） |
+
+B-4（目視確認）と C-1（AI-DLC の記述）は**ユーザー本人が引き取ってクローズ**した。
 
 ## 🌐 公開 URL
 **https://d3bttkxchvfb66.cloudfront.net**（スタック `hk-portfolio-prod` / `ap-northeast-1`）

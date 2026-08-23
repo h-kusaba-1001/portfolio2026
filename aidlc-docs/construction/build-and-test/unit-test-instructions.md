@@ -12,11 +12,11 @@ sail exec laravel.test ./vendor/bin/pest
 sail exec laravel.test ./vendor/bin/pest tests/Feature/ContentPipelineTest.php
 ```
 
-## 期待される結果（2026-08-22 時点）
+## 期待される結果（2026-08-23 時点）
 
 ```
-Tests:    30 passed (168 assertions)
-Duration: 0.77s
+Tests:    35 passed (177 assertions)
+Duration: 0.69s
 ```
 
 **失敗は 0 件であること。**

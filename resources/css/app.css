@@ -41,6 +41,17 @@
     --diagram-arrow: #94a3b8;
 }
 
+/*
+  ダークの定義は 2 箇所ある。
+    - この @media  … テーマ設定が「自動」のとき（OS の設定に従う）
+    - 下の :root.dark … テーマ設定が「ダーク」のとき
+
+  **2 つは必ず同じ変数を同じ値で持つこと。**
+  片方にだけ変数を足すと、その設定のときだけ色が崩れる。
+  実際、図の 4 変数がこちらに無かったため「自動 + OS がダーク」のときだけ
+  カードが白いまま文字が薄い色になり、読めなくなっていた。
+  食い違いは tests/Feature/ThemeTokensTest.php が検出する。
+*/
 @media (prefers-color-scheme: dark) {
     :root:not(.light) {
         color-scheme: dark;
@@ -52,6 +63,10 @@
         --border: #1e293b;
         --accent: #34d399;
         --accent-hover: #6ee7b7;
+        --diagram-node: #132a24;
+        --diagram-node-quiet: #111a2e;
+        --diagram-border: #334155;
+        --diagram-arrow: #64748b;
     }
 }
 

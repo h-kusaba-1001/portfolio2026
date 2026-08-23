@@ -709,3 +709,87 @@ Q3: "C"（上部に固定ヘッダ）
 
 デプロイ後に 4 アイコンとも 200 を確認。テスト 30 passed 維持。
 **Context**: CONSTRUCTION フェーズ / UoW-4 の図の作り直し
+
+---
+
+## 構成図の流れに関する確認 / P-2 の対応
+**Timestamp**: 2026-08-23T05:35:00Z
+**User Input**: "構成図のところなんだけれど、CloudFront->s3->APIGWのながれじゃないっけ？ 二股になっているけれど、実際にはS3からAPIGW叩いてない？っていう確認でした もし認識間違えていたら教えて"
+**AI Response**: 本番の CloudFront ディストリビューション設定を `aws cloudfront get-distribution-config` で確認し、二股（パスベースのルーティング）が正しいことを回答した。既定は API Gateway、`/build/*`・`/aws-icons/*`・`/brand/*` は S3。**S3 が API Gateway を呼ぶことはない。** さらに、これは 1 本の流れですらなく「HTML を取りに行く」「HTML に書かれた JS を取りに行く」という別々の 2 リクエストであることを説明した。ただし**二股の線に説明が無いのは図の欠陥**と認め、線に `/*` と `/build/*` のラベルを描画するよう `ArchitectureDiagram.tsx` を修正。`content/stack.md` の S3 節にも同趣旨の説明を追記した。
+**Context**: CONSTRUCTION フェーズ / UoW-4 の図の修正
+
+---
+
+## P-2（HTML キャッシュ）の TTL 決定
+**Timestamp**: 2026-08-23T05:38:00Z
+**User Input**: "P-2は
+キャッシュも5秒とかでいいかもですがどう思いますか？"
+**AI Response**: 5 秒に賛成し、理由を提示した。(1) 削減効果の大半は「キャッシュ無し → 5 秒」で得られ、5 秒でも 1 エッジあたり Lambda 到達は 0.2 回/秒に落ちる。60 秒へ伸ばす差は小さく、費用の天井はアカウント同時実行上限 10（ADR-016）が既に担保している。(2) CloudFront のキャッシュはエッジ単位のため、散発的なアクセスでは TTL を伸ばしてもヒット率は上がらない。(3) `versionedAssets` 未使用のため、HTML を長く保持すると消えたアセットを指して画面が壊れる。5 秒ならその窓が無視できる。実装として独自キャッシュポリシー（MinTTL 0 / DefaultTTL 5 / MaxTTL 5）と `CacheControl` ミドルウェアを追加し、ADR-017 として記録。デプロイ前に `osls package` で生成テンプレートを検査し、`DefaultCacheBehavior` の深いマージによって `OriginRequestPolicyId` 等が失われないことを確認した。本番で Miss → Hit → Hit を確認。
+**Context**: CONSTRUCTION フェーズ / backlog P-2 の解消
+
+---
+
+## I-2: CSP の `'unsafe-inline'` 除去
+**Timestamp**: 2026-08-23T06:00:00Z
+**User Input**: "OK
+他の残タスクも処理してください"
+**AI Response**: I-2 に着手。アプリ側に残っていた `style` 属性を全て排除した。(1) `DiagramNode` / `ArchitectureDiagram` の文字は SVG のプレゼンテーション属性（`fontSize` / `fontWeight`）に変更。(2) `Career` の丸と見出しは index からの計算をやめ、静的な Tailwind クラスの配列 `PERSPECTIVE` から選ぶ方式に変更（**項目が増えても既存項目の見え方が変わらなくなる副次的な利点あり**）。そのうえで本番 CSP の `style-src` を `'self'` のみにした。ローカルは Vite の HMR が `<style>` を注入するため緩和を維持。ビルド成果物中の `createElement('style')` は React 19 の `<style precedence>` 用経路であり、この実装では通らないことを確認。本番で CSP ヘッダから `'unsafe-inline'` が消えたこと、配信 HTML に `style=` / `<style` が 0 件であること、CSS・JS が 200 で取得できることを確認。ADR-011 を Superseded とし ADR-018 を追加。テスト 35 passed（177 assertions）。**実ブラウザでの表示崩れ確認は機械では担保できないため B-4 に追記した。**
+**Context**: CONSTRUCTION フェーズ / backlog I-2 の解消
+
+---
+
+## C-1 の取り下げ
+**Timestamp**: 2026-08-23T06:02:00Z
+**User Input**: "C-1はこっちで後で書くのでやらなくてOK"
+**AI Response**: C-1（AI-DLC を取り入れたことをサイトに書く）を作業対象から外した。backlog には項目として残し、担当がユーザ側であることを明記する。
+**Context**: CONSTRUCTION フェーズ / 残タスクの整理
+
+---
+
+## B-3: 完了条件の最終確認
+**Timestamp**: 2026-08-23T06:15:00Z
+**User Input**: （継続作業。直近の指示は "他の残タスクも処理してください"）
+**AI Response**: `docs/requirements.md` §7 の 7 項目を確認。5 項目を機械的に確認できた（公開状態 200、`prefers-reduced-motion` 対応 3 箇所、構成図が Hero 直後の最初のセクション、5 セクション全てが `SectionLead` を使用、セクションごとのレイアウトが 5 種類に分かれている）。残る 2 項目（スマホでの可読性、図の動きの見え方）は**実装は完了しており目視確認のみ**のため B-4 に統合した。§7 に確認結果と根拠を追記。
+**Context**: CONSTRUCTION フェーズ / backlog B-3 の解消
+
+---
+
+## I-1: デプロイ時間の測り直しと結論
+**Timestamp**: 2026-08-23T06:20:00Z
+**User Input**: （継続作業）
+**AI Response**: 工程ごとに実測したところ、**当初の見積もりが外れていた**ことが判明。composer の入れ替えは 30〜60 秒ではなく片道 2〜4 秒（初回デプロイ時の値を一般化していた）。`composer audit` 1 秒 / `npm audit` 1 秒 / Vite ビルド 4 秒 / `composer --no-dev` 2 秒 / `osls deploy` 17〜125 秒 / 復元 4 秒。**時間を食っているのは osls / CloudFormation だけで、それ以外は合計 12 秒。** よって案 A（`--fast`）のみ実装済みとし、案 B〜E は見送ると結論。特に案 B の「`--no-dev` をやめて `package.patterns` で除外する」形は、**新しい開発依存が黙って本番に混入するリスク**があるため採らない旨を記録した。
+**Context**: CONSTRUCTION フェーズ / backlog I-1 の解消
+
+---
+
+## Build and Test の承認 / B-4・C-1 の引き取り
+**Timestamp**: 2026-08-23T06:30:00Z
+**User Input**: "B-4, C-1はこちらでやるのでDONEにして
+Continue to Next Stage"
+**AI Response**: B-4（目視確認）と C-1（AI-DLC をサイトに書く）を**ユーザー本人が引き取る**ものとして backlog でクローズした。**AI 側で検証を実施したわけではない**ことが後から分かるよう、確認対象の一覧（構成図の線のラベル、粒の速度、375px の縦積み、ダークモード、CSP 厳格化後の表示崩れ、キャリアの丸の大小）と、崩れていた場合の戻し方（`config/security.php` の `style-src`）を項目内に残した。C-1 には原稿の置き場所（`content/` に Markdown を置き `config/content.php` にセクションを追加）を記載。これにより追跡中の課題はゼロ（K-1 / K-2 は意図的に対応しない判断済み）。Build and Test ステージを承認済みとし、Operations（プレースホルダ）へ進んだ。
+**Context**: CONSTRUCTION フェーズ完了 → OPERATIONS フェーズ
+
+---
+
+## Operations（プレースホルダ）
+**Timestamp**: 2026-08-23T06:31:00Z
+**User Input**: （同上）
+**AI Response**: Operations は現行ワークフローではプレースホルダのため、実施する作業は無い。ワークフローとしては完了。運用に関わる情報（デプロイ手順、権限、運用上の注意）は README・`docs/backlog.md` §7・`bin/deploy.sh` に既に整理済みであることを確認した。
+**Context**: OPERATIONS フェーズ / ワークフロー完了
+
+---
+
+## ダークモードで図の文字が読めない不具合
+**Timestamp**: 2026-08-23T06:45:00Z
+**User Input**: "[スクリーンショット] ダークモードだとLambdaとかの文字が薄いので修正して"
+**AI Response**: 原因は `resources/css/app.css` の**ダーク定義が 2 箇所に分かれており、`@media (prefers-color-scheme: dark)` 側にだけ図の 4 変数（`--diagram-node` ほか）が無かった**こと。テーマ設定が「自動」かつ OS がダークのとき、カードだけライトの値（白）にフォールバックし、文字は `--fg`（薄いグレー）になるため読めなくなっていた。テーマ設定が「ダーク」のときは `:root.dark` に 4 変数があるため再現しない。@media 側に 4 変数を追加して修正。**同種の取りこぼしが目視でしか気づけないため、2 つのダーク定義が同じトークンを同じ値で持つことを検証する `ThemeTokensTest` を追加した。** あわせて、構成図の線のラベルが矢印と重なって読みにくかったため `paint-order` による背景色の縁取りを追加し、色も `--fg-faint` から `--fg-muted` に上げた。
+**Context**: UoW-4 の不具合修正
+
+---
+
+## ファビコンの設定
+**Timestamp**: 2026-08-23T06:50:00Z
+**User Input**: "OKです
+faviconをHの文字になるよう設定してください"
+**AI Response**: アクセント色（emerald-700 `#047857`）の角丸に白の H を置いた `public/brand/favicon.svg` を作成。`rsvg-convert` で 16/32/48/180px の PNG を生成し、16/32/48 を 1 つの `favicon.ico` にまとめ、180px を `apple-touch-icon.png` とした。**既存の `public/favicon.ico` は 0 バイトの Laravel の置き土産だったため置き換えた。** タブはライト・ダークどちらの背景にもなるため、文字だけの図案にせず背景を塗ってコントラストを固定している。`/favicon.ico` は Lift の `assets` に書かないと Lambda に流れて 404 になる（**実際に本番で 404 だった**）ため `serverless.yml` に単一ファイルの割り当てを追加。**この取りこぼしは /aws-icons/* と /brand/* で 2 回踏んでいるため、`PublicAssetsTest` を追加して機械的に止めるようにした**（blade が参照するパスが実在すること、それが assets のパターンに含まれること、assets の配信元が実在すること）。本番で 3 ファイルとも 200 と正しい Content-Type を確認。
+**Context**: UoW-4 / 仕上げ

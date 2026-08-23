@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="HK Portfolio">
+    <title>HK Portfolio</title>
+    <!--
+        サイトのアクセント色（emerald-700）の角丸に白の H。
+        ブラウザのタブはライト・ダークどちらの背景にもなるため、
+        文字だけの図案にせず**背景を塗って**コントラストを固定する。
+        タブでは 16px まで縮むので、線は太く・余白は広く取る。
+    -->
+    <rect width="64" height="64" rx="14" fill="#047857" />
+    <path d="M20 16 v32 M44 16 v32 M20 32 h24" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
+</svg>

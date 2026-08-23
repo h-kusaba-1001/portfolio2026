@@ -94,7 +94,8 @@ export default function DiagramNode({ node, x, y, width, height, selected, onSel
                 y={height - 26}
                 textAnchor="middle"
                 className="fill-[color:var(--fg)]"
-                style={{ fontSize: 18, fontWeight: 700 }}
+                fontSize={18}
+                fontWeight={700}
             >
                 {node.label}
             </text>
@@ -105,7 +106,7 @@ export default function DiagramNode({ node, x, y, width, height, selected, onSel
                     y={height - 9}
                     textAnchor="middle"
                     className="fill-[color:var(--fg-muted)]"
-                    style={{ fontSize: 12.5 }}
+                    fontSize={12.5}
                 >
                     {node.caption}
                 </text>
