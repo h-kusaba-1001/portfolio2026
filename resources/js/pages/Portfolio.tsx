@@ -4,12 +4,10 @@ import Experience from '@/components/sections/Experience';
 import Hero from '@/components/sections/Hero';
 import Next from '@/components/sections/Next';
 import Stack from '@/components/sections/Stack';
-import TradeOffs from '@/components/sections/TradeOffs';
 import type { PortfolioPageProps, SectionId, SectionProps } from '@/types';
 
 const NAV = [
     { href: '#stack', label: '技術構成' },
-    { href: '#tradeoffs', label: '選ばなかったもの' },
     { href: '#experience', label: 'やってきたこと' },
     { href: '#career', label: 'キャリア' },
     { href: '#next', label: 'これから' },
@@ -39,7 +37,6 @@ export default function Portfolio({ sections }: PortfolioPageProps) {
 
                 <div className="space-y-24 sm:space-y-32">
                     {stack !== undefined && <Stack section={stack} />}
-                    <TradeOffs />
                     {experience !== undefined && <Experience section={experience} />}
                     {career !== undefined && <Career section={career} />}
                     {next !== undefined && <Next section={next} />}
@@ -55,7 +52,11 @@ function SiteHeader() {
     return (
         <div className="sticky top-0 z-20 border-b border-[color:var(--border)] bg-[color:var(--bg)]">
             <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
-                <a href="#top" className="text-sm font-semibold tracking-tight" data-testid="site-header-home">
+                <a
+                    href="#top"
+                    className="font-mono text-sm font-medium tracking-[0.14em]"
+                    data-testid="site-header-home"
+                >
                     HK Portfolio
                 </a>
 

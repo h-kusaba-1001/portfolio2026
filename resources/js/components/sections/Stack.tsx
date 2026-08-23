@@ -9,8 +9,7 @@ import type { SectionProps } from '@/types';
 /**
  * 構成図のブロック（Hero と一体で最上部に置く。D-4）。
  *
- * 図そのものはここ。図の「読み解き」（何を選ばなかったか）は
- * 下の TradeOffs セクションが担う。
+ * 各ノードを選んだ理由は NodePanel（content/stack.md 由来）が担う。
  */
 export default function Stack({ section }: { section: SectionProps }) {
     const [selectedId, setSelectedId] = useState<string | null>(null);

@@ -12,20 +12,20 @@ import GitHubLink from '@/components/ui/GitHubLink';
 export default function Hero() {
     return (
         <header className="pt-16 pb-12 sm:pt-24" data-testid="section-hero">
-            <p className="text-sm tracking-widest text-[color:var(--fg-faint)] uppercase">
+            <p className="font-mono text-sm tracking-[0.22em] text-[color:var(--fg-faint)] uppercase">
                 HK Portfolio
             </p>
 
-            <h1 className="mt-6 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">
-                月額 100 円未満で動く、
+            <h1 className="mt-7 text-[2.125rem] leading-[1.12] font-semibold tracking-[-0.03em] sm:text-[3.5rem]">
+                月額 <span className="tnum">100</span> 円未満で動く、
                 <br className="hidden sm:block" />
                 サーバレスなポートフォリオ
             </h1>
 
-            <p className="mt-6 max-w-xl leading-relaxed text-[color:var(--fg-muted)]">
+            <p className="mt-7 max-w-xl text-[1.0625rem] leading-[1.85] text-[color:var(--fg-muted)]">
                 データベースを持たず、固定費を限りなくゼロに近づけた構成で動いています。
                 <strong className="font-medium text-[color:var(--fg)]">
-                    何を選び、何を選ばなかったのか
+                    何をどう選んだのか
                 </strong>
                 を、理由つきで載せています。
             </p>
