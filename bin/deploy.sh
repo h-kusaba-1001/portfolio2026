@@ -82,8 +82,10 @@ else
     run npx osls deploy --stage "${STAGE}"
 fi
 
-echo "==> デプロイ完了"
-
 if [ "$FAST" = false ]; then
     run npx osls info --stage "${STAGE}"
 fi
+
+# **ここまでは「配信した」だけ。壊れていないことを確かめて初めて完了とする。**
+# HTTP 200 のまま画面が真っ白になったことがあるため、状態コードだけでは足りない。
+"$(dirname "$0")/verify-deploy.sh"
