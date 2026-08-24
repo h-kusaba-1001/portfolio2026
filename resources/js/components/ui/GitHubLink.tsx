@@ -1,4 +1,4 @@
-const REPOSITORY_URL = 'https://github.com/h-kusaba-1001/portfolio2026';
+const REPOSITORY_URL = 'https://github.com/hkusa-1001/portfolio2026';
 
 /**
  * Hero に置くリポジトリへのリンク。
