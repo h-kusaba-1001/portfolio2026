@@ -15,8 +15,14 @@ STACK="${STACK:-hk-portfolio-prod}"
 HOURS=24
 INCLUDE_SELF=0
 RAW_DIR=""
-# 既定の除外 IP（サイト所有者）
-EXCLUDE_IPS=("72.14.201.152")
+# 既定の除外 IP（サイト所有者）。回線が変わったら足す / 入れ替える。
+EXCLUDE_IPS=(
+    "72.14.201.152"
+    # 2026-08-22〜23 のログで全体の 94% を占めていた IP。
+    # 本人の回線かどうか未確認のため、既定では有効にしていない。
+    # 自分のものだと分かったらコメントを外すこと。
+    # "61.114.213.168"
+)
 EXTRA_EXCLUDES=()
 
 while [ $# -gt 0 ]; do
@@ -57,11 +63,13 @@ if [ -z "${BUCKET:-}" ] || [ "$BUCKET" = "None" ]; then
     exit 1
 fi
 
-WORK="${RAW_DIR:-$(mktemp -d)}"
+# 作業ディレクトリ。/tmp 直下ではなくカレント配下に作る
+# （サンドボックス環境では /tmp/tmp.XXXX への書き込みが止まることがある）
+WORK="${RAW_DIR:-$(mktemp -d "${TMPDIR:-.}/cf-logs.XXXXXX")}"
 mkdir -p "$WORK"
 CLEANUP=1
 [ -n "$RAW_DIR" ] && CLEANUP=0
-trap '[ "$CLEANUP" = 1 ] && rm -rf "$WORK"' EXIT
+trap 'if [ "$CLEANUP" = 1 ]; then rm -rf "$WORK"; fi' EXIT
 
 # --- 対象時間帯のキーだけを落とす -----------------------------------------
 # ログのファイル名は <DistId>.YYYY-MM-DD-HH.<hash>.gz（HH は UTC、イベント発生時刻）。
@@ -85,10 +93,37 @@ KEY_COUNT=$(wc -l < "$WORK/keys.txt" | tr -d ' ')
 
 : > "$WORK/all.tsv"
 if [ "$KEY_COUNT" -gt 0 ]; then
+    # `aws s3 cp` ではなく `s3api get-object` を使う。
+    # 前者はマルチスレッドの転送マネージャを噛ませるため、サンドボックス下で
+    # 無限に待つことがある。並列化も同じ理由で避け、逐次 + タイムアウトで回す。
+    # 1 ファイル 1 秒弱、14 日分（数十ファイル）でも 1 分かからない。
+    export AWS_MAX_ATTEMPTS=3
+    failed=0
+    done_n=0
     while read -r key; do
         [ -z "$key" ] && continue
-        aws s3 cp "s3://${BUCKET}/${key}" "$WORK/$(basename "$key")" --quiet
+        out="$WORK/$(basename "$key")"
+        ok=0
+        for attempt in 1 2 3; do
+            if timeout 30 aws s3api get-object --bucket "$BUCKET" --key "$key" \
+                    --cli-connect-timeout 5 --cli-read-timeout 20 "$out" >/dev/null 2>&1; then
+                ok=1
+                break
+            fi
+            rm -f "$out"
+        done
+        if [ "$ok" = 1 ]; then
+            done_n=$(( done_n + 1 ))
+        else
+            failed=$(( failed + 1 ))
+            echo "  ! 取得に失敗（スキップ）: $key" >&2
+        fi
+        if [ -t 2 ]; then printf '\r  取得中 %d/%d' "$(( done_n + failed ))" "$KEY_COUNT" >&2; fi
     done < "$WORK/keys.txt"
+    if [ -t 2 ]; then printf '\r%*s\r' 40 '' >&2; fi
+    if [ "$failed" -gt 0 ]; then
+        echo "  ! ${failed} ファイルの取得に失敗した。集計はその分欠けている。" >&2
+    fi
     # ヘッダ行（#Version / #Fields）を落として連結
     zcat "$WORK"/*.gz 2>/dev/null | grep -v '^#' > "$WORK/all.tsv" || true
 fi
@@ -98,15 +133,15 @@ NOW_UTC=$(date -u -d "@${NOW_EPOCH}" '+%Y-%m-%d %H:%M:%S')
 
 EXCLUDE_CSV=$(IFS=,; echo "${EXCLUDE_IPS[*]:-}")
 
-awk -F'\t' -v from="$FROM_EPOCH" -v excl="$EXCLUDE_CSV" \
+# TZ=UTC で走らせる。ログの日時は UTC なので、mktime にそのまま食わせられる。
+TZ=UTC awk -F'\t' -v from="$FROM_EPOCH" -v excl="$EXCLUDE_CSV" \
     -v from_utc="$FROM_UTC" -v now_utc="$NOW_UTC" -v hours="$HOURS" \
     -v bucket="$BUCKET" -v dist="$DIST_ID" -v files="$KEY_COUNT" '
-function epoch(d, t,   Y,M,D,hh,mm,ss) {
+function epoch(d, t,   a, b) {
     split(d, a, "-"); split(t, b, ":")
-    return mktime(a[1] " " a[2] " " a[3] " " b[1] " " b[2] " " b[3]) - tzoff
+    return mktime(a[1] " " a[2] " " a[3] " " b[1] " " b[2] " " b[3])
 }
 BEGIN {
-    tzoff = systime() - mktime(strftime("%Y %m %d %H %M %S", systime(), 1))
     n = split(excl, e, ",")
     for (i = 1; i <= n; i++) { if (e[i] != "") ex[e[i]] = 1 }
 }
@@ -154,6 +189,10 @@ END {
         s = ""
         for (i in ex) { s = s (s == "" ? "" : ", ") i }
         printf " 除外 IP        : %s  (%d リクエストを除外)\n", s, self_hits + 0
+        if (self_hits + 0 == 0) {
+            printf " ⚠ 除外 IP はこの期間に 1 件も現れていない。回線が変わっている可能性がある。\n"
+            printf "   下の「リクエスト元 IP 上位」を見て、必要なら --exclude-ip で追加すること。\n"
+        }
     } else {
         printf " 除外 IP        : なし (--include-self)\n"
     }
@@ -179,7 +218,7 @@ END {
     for (h = 0; h < 24; h++) {
         k = sprintf("%02d", h)
         if (!(k in hour)) continue
-        jst = sprintf("%02d", (h + 9) %% 24)
+        jst = sprintf("%02d", (h + 9) % 24)
         bar = ""
         c = hour[k]
         w = int(c / 2); if (w > 40) w = 40; if (c > 0 && w == 0) w = 1
