@@ -27,6 +27,25 @@ final class PrerenderPortfolio extends Command
 
     protected $description = 'トップページをビルド時に描画して保存する（AI・クローラ向け）';
 
+    /**
+     * SSR の出力から、#app の中身だけを取り出す。
+     *
+     * Inertia が返す body は
+     *   <script data-page="app" ...>...</script><div id="app">中身</div>
+     * という形。**この外側は Blade が出すので、ここでは中身だけを取る。**
+     *
+     * script を残すと同じペイロードが 2 回出て HTML が倍になる。
+     * div を残すと id="app" が入れ子で 2 つになり、
+     * Inertia がどちらを掴むか不定になる。
+     */
+    private function innerHtml(string $body): string
+    {
+        $inner = preg_replace('/\A.*?<div[^>]*id="app"[^>]*>/s', '', $body) ?? '';
+        $inner = preg_replace('/<\/div>\s*\z/s', '', $inner) ?? '';
+
+        return trim($inner);
+    }
+
     public function handle(GetPortfolioContent $getPortfolioContent): int
     {
         $bundle = base_path('bootstrap/ssr/ssr.js');
@@ -74,14 +93,11 @@ final class PrerenderPortfolio extends Command
             @unlink($input);
         }
 
-        // body には Inertia が data-page の <script> も含めて返す。
-        // その script は Blade 側が出すので、ここでは取り除く。
-        // **残したまま埋めると、同じペイロードが 2 回出て HTML が倍近くなる。**
-        $body = preg_replace('/<script data-page.*?<\/script>/s', '', $rendered['body']) ?? '';
+        $html = $this->innerHtml($rendered['body']);
 
-        PrerenderedPage::store(trim($body));
+        PrerenderedPage::store($html);
 
-        $this->info(sprintf('プリレンダを保存しました（%s 文字）', number_format(mb_strlen($body))));
+        $this->info(sprintf('プリレンダを保存しました（%s 文字）', number_format(mb_strlen($html))));
 
         return self::SUCCESS;
     }

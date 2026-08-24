@@ -51,6 +51,13 @@
         $page は Inertia がルートビューに渡す変数で、@inertia が出すものと同じ。
         プリレンダが無いとき（ローカルなど）は従来どおり空の #app になる。
     --}}
-    <div id="app" data-page="{{ json_encode($page) }}">{!! $prerenderedPage !!}</div>
+    {{--
+        @inertia が出すものと同じ形にすること。**Inertia v3 はページ情報を
+        下の <script data-page="app"> から読む。** 以前ここを
+        <div data-page="..."> だけにしてしまい、script が消えた結果、
+        クライアントが null を掴んで画面が真っ白になった。
+        構造は tests/Feature/InertiaRootTest.php が固定している。
+    --}}
+    <script data-page="app" type="application/json">{!! json_encode($page, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!}</script><div id="app">{!! $prerenderedPage !!}</div>
 </body>
 </html>
